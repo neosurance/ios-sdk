@@ -42,6 +42,12 @@ pod 'NeosuranceSDK'
 
 5. -(void)customEvent:(NSDictionary*)
 
+ ```objc          
+  NSRRequest* request = [[NSRRequest alloc] init];
+  request.event = [NSRUtils makeEvent:@"connection" payload:payload];
+  [request send];
+```
+
 ## Author
 
 Tonino Mendicino, tonino@clickntap.com
