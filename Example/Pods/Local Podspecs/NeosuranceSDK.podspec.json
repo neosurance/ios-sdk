@@ -1,0 +1,22 @@
+{
+  "name": "NeosuranceSDK",
+  "version": "0.1.0",
+  "summary": "A short description of NeosuranceSDK.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/Tonino Mendicino/NeosuranceSDK",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Tonino Mendicino": "tonino@clickntap.com"
+  },
+  "source": {
+    "git": "https://github.com/Tonino Mendicino/NeosuranceSDK.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "NeosuranceSDK/Classes/**/*"
+}

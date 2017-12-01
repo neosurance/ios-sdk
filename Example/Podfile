@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'NeosuranceSDK_Example' do
+  pod 'NeosuranceSDK', :path => '../'
+
+  target 'NeosuranceSDK_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
