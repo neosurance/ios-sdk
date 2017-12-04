@@ -6,6 +6,31 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Requirements
 
+
+```plist
+    <key>NSAppTransportSecurity</key>
+    <dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <true/>
+    </dict>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Always...</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>When in use...</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Always and when in use...</string>
+    <key>NSMotionUsageDescription</key>
+    <string>Motion...</string>
+    <key>UIBackgroundModes</key>
+    <array>
+    <string>audio</string>
+    <string>fetch</string>
+    <string>location</string>
+    <string>remote-notification</string>
+    </array>
+```
+
+
 ## Installation
 
 NeosuranceSDK is available through [CocoaPods](http://cocoapods.org). To install
