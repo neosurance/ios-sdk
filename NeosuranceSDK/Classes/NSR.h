@@ -41,5 +41,8 @@
 - (void)registerUser:(NSRUser*) user;
 - (BOOL)forwardNotification:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler;
 - (void)showApp;
+- (void)sendEvent:(NSString*)name payload:(NSDictionary*)payload;
+
+
 
 @end

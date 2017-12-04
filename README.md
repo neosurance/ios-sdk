@@ -19,38 +19,51 @@ pod 'NeosuranceSDK'
 1. Init
 
 ```objc
-  NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
-  [settings setObject:@"https://sandbox.neosurancecloud.net/sdk/api/v1.0/" forKey:@"base_url"];
-  [settings setObject:@"****-****-****-****" forKey:@"secret_key"];
-  [settings setObject:@"****-****-****-****" forKey:@"community_code"];
-  [[NSR sharedInstance] setupWithDictionary:settings];
-  [[NSR sharedInstance] forceBackgroundWithSilenceAudio];
+    NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
+    [settings setObject:@"https://sandbox.neosurancecloud.net/sdk/api/v1.0/" forKey:@"base_url"];
+    [settings setObject:@"xxxx" forKey:@"code"];
+    [settings setObject:@"xxxx" forKey:@"secret_key"];
+    [[NeosuranceSDK sharedInstance] setupWithDictionary:settings navigationController:navigationController];
+    [[NeosuranceSDK sharedInstance] stayInBackground];
 ```
 2. setUser
 
 ```objc
-  NSRUser* user = [[NSRUser alloc] init];
-  user.email = responseObject[@"email"];
-  user.code = responseObject[@"code"];
-  user.firstname = responseObject[@"firstname"];
-  user.lastname = responseObject[@"lastname"];
-  [[NSR sharedInstance] setUser:user];
+    NSRUser* user = [[NSRUser alloc] init];
+    user.email = @"jhon.doe@acme.com";
+    user.code = @"jhon.doe@acme.com";
+    user.firstname = @"Jhon";
+    user.lastname = @"Doe";
+    [[NeosuranceSDK sharedInstance] registerUser:user];
 ```
 3. -(BOOL)forwardNotification
 
+```objc
+    - (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler  {
+        if(![[NeosuranceSDK sharedInstance] forwardNotification:response withCompletionHandler:(void(^)(void))completionHandler]) {
+            //TODO: handle your notification
+        }
+        completionHandler();
+    }
+```
 4. -(void)showApp
+
+```objc
+    [[NeosuranceSDK sharedInstance] showApp];
+```
 
 5. -(void)customEvent:(NSDictionary*)
 
  ```objc          
-  NSRRequest* request = [[NSRRequest alloc] init];
-  request.event = [NSRUtils makeEvent:@"connection" payload:payload];
-  [request send];
+    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+    [payload setObject:@"custom" forKey:@"type"];
+    [[NeosuranceSDK sharedInstance] sendEvent:@"custom" payload:payload];
 ```
 
 ## Author
 
-Tonino Mendicino, tonino@clickntap.com
+Giovanni Tigli, giovanni.tigli@neosurance.eu
+Tonino Mendicino, tonino.mendicino@clickntap.com
 
 ## License
 

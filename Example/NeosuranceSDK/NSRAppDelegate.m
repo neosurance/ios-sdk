@@ -61,15 +61,13 @@
     user.code = @"tonino@clickntap.com";
     user.firstname = @"Tonino";
     user.lastname = @"Mendicino";
-    [[NeosuranceSDK sharedInstance]   registerUser:user];
+    [[NeosuranceSDK sharedInstance] registerUser:user];
 }
 
 -(void)sampleSendCustomEvent {
     NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
     [payload setObject:@"custom" forKey:@"type"];
-    NSRRequest* request = [[NSRRequest alloc] init];
-    request.event = [NSRUtils makeEvent:@"custom" payload:payload];
-    [request send];
+    [[NeosuranceSDK sharedInstance] sendEvent:@"custom" payload:payload];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {

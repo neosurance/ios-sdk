@@ -57,6 +57,12 @@
     }
 }
 
+-(void)sendEvent:(NSString*)name payload:(NSDictionary*)payload {
+    NSRRequest* request = [[NSRRequest alloc] init];
+    request.event = [NSRUtils makeEvent:name payload:payload];
+    [request send];
+}
+
 
 -(void)showApp {
     NSDictionary* settings = [[NSR sharedInstance] authSettings];
