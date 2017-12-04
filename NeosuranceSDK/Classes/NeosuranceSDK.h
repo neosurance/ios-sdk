@@ -1,7 +1,5 @@
-#import <Foundation/Foundation.h>
+#import "NSR.h"
 
-@interface NeosuranceSDK : NSObject
-
--(void)hello;
+@interface NeosuranceSDK : NSR
 
 @end

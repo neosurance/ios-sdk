@@ -2,8 +2,4 @@
 
 @implementation NeosuranceSDK
 
--(void)hello {
-    NSLog(@"hello...");
-}
-
 @end

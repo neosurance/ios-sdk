@@ -1,46 +1,90 @@
-//
-//  NSRAppDelegate.m
-//  NeosuranceSDK
-//
-//  Created by Tonino Mendicino on 12/01/2017.
-//  Copyright (c) 2017 Tonino Mendicino. All rights reserved.
-//
-
 #import "NSRAppDelegate.h"
+#import "NSRViewController.h"
+#import <NeosuranceSDK/NeosuranceSDK.h>
+#import <NeosuranceSDK/NSRRequest.h>
+#import <NeosuranceSDK/NSRUtils.h>
 
 @implementation NSRAppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-    // Override point for customization after application launch.
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
+    NSRViewController *controller = [[NSRViewController alloc] init];
+    controller.view.backgroundColor = [UIColor darkGrayColor];
+    UIWindow* window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:controller];
+    navigationController.navigationBarHidden = YES;
+    [window setRootViewController:navigationController];
+    [window makeKeyAndVisible];
+    self.window = window;
+    
+    [self enablePushNotifications];
+
+    NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
+    [settings setObject:@"https://sandbox.neosurancecloud.net/sdk/api/v1.0/" forKey:@"base_url"];
+    [settings setObject:@"com01" forKey:@"code"];
+    [settings setObject:@"pass" forKey:@"secret_key"];
+    [settings setObject:[NSNumber numberWithBool:YES] forKey:@"dev_mode"];
+    [[NeosuranceSDK sharedInstance] setupWithDictionary:settings navigationController:navigationController];
+    [[NeosuranceSDK sharedInstance] stayInBackground];
+    
+    [self sampleRegisterUser];
+    [self sampleSendCustomEvent];
+
     return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application
-{
-    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-    // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+-(void)enablePushNotifications {
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge)
+                          completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                              if(granted) {
+                                  UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+                                  center.delegate = self;
+                              }
+                          }];
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application
-{
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler  {
+    completionHandler(UNNotificationPresentationOptionAlert);
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
-    // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler  {
+    if(![[NeosuranceSDK sharedInstance] forwardNotification:response withCompletionHandler:(void(^)(void))completionHandler]) {
+        //TODO: handle your notification
+    }
+    completionHandler();
 }
 
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+-(void)sampleRegisterUser {
+    NSRUser* user = [[NSRUser alloc] init];
+    user.email = @"tonino@clickntap.com";
+    user.code = @"tonino@clickntap.com";
+    user.firstname = @"Tonino";
+    user.lastname = @"Mendicino";
+    [[NeosuranceSDK sharedInstance]   registerUser:user];
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application
-{
-    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+-(void)sampleSendCustomEvent {
+    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+    [payload setObject:@"custom" forKey:@"type"];
+    NSRRequest* request = [[NSRRequest alloc] init];
+    request.event = [NSRUtils makeEvent:@"custom" payload:payload];
+    [request send];
+}
+
+- (void)applicationWillResignActive:(UIApplication *)application {
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application {
 }
 
 @end

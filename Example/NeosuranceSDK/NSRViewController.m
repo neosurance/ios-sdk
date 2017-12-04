@@ -1,29 +1,23 @@
-//
-//  NSRViewController.m
-//  NeosuranceSDK
-//
-//  Created by Tonino Mendicino on 12/01/2017.
-//  Copyright (c) 2017 Tonino Mendicino. All rights reserved.
-//
-
 #import "NSRViewController.h"
-
-@interface NSRViewController ()
-
-@end
+#import <NeosuranceSDK/NeosuranceSDK.h>
 
 @implementation NSRViewController
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+-(void)loadUi {
+    [super loadUi];
+    btn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btn addTarget:self  action:@selector(showApp) forControlEvents:UIControlEventTouchUpInside];
+    [btn setTitle:@"Policies" forState:UIControlStateNormal];
+    btn.frame = CGRectMake(80.0, 210.0, 160.0, 40.0);
+    [self.view addSubview:btn];}
+
+-(void)showApp {
+    [[NeosuranceSDK sharedInstance] showApp];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+-(void)setupUi:(CGSize)size {
+    [super setupUi:size];
+    btn.center = CGPointMake(size.width/2, size.height/2);
 }
 
 @end

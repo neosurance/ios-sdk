@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "summary": "A short description of NeosuranceSDK.",
   "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/Tonino Mendicino/NeosuranceSDK",
+  "homepage": "https://github.com/clickntap/NeosuranceSDK",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -12,11 +12,27 @@
     "Tonino Mendicino": "tonino@clickntap.com"
   },
   "source": {
-    "git": "https://github.com/Tonino Mendicino/NeosuranceSDK.git",
+    "git": "https://github.com/clickntap/NeosuranceSDK",
     "tag": "0.1.0"
   },
   "platforms": {
     "ios": "8.0"
   },
-  "source_files": "NeosuranceSDK/Classes/**/*"
+  "source_files": "NeosuranceSDK/Classes/**/*",
+  "resource_bundles": {
+    "NeosuranceSDK": [
+      "NeosuranceSDK/Assets/*.*"
+    ]
+  },
+  "dependencies": {
+    "AFNetworking": [
+
+    ],
+    "UIColor-Utilities": [
+
+    ],
+    "MMMaterialDesignSpinner": [
+
+    ]
+  }
 }

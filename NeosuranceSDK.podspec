@@ -32,11 +32,13 @@ TODO: Add long description of the pod here.
 
   s.source_files = 'NeosuranceSDK/Classes/**/*'
 
-  # s.resource_bundles = {
-  #   'NeosuranceSDK' => ['NeosuranceSDK/Assets/*.png']
-  # }
+  s.resource_bundles = {
+    'NeosuranceSDK' => ['NeosuranceSDK/Assets/*.*']
+  }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+    s.dependency 'AFNetworking'
+    s.dependency 'UIColor-Utilities'
+    s.dependency 'MMMaterialDesignSpinner'
 end
