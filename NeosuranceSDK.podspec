@@ -35,10 +35,6 @@ TODO: Add long description of the pod here.
   s.resource_bundles = {
     'NeosuranceSDK' => ['NeosuranceSDK/Assets/*.*']
   }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-    s.dependency 'AFNetworking'
-    s.dependency 'UIColor-Utilities'
-    s.dependency 'MMMaterialDesignSpinner'
+  
+  s.dependency 'TapFramework', :git => 'https://github.com/clickntap/TapFramework'
 end
