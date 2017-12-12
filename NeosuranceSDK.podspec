@@ -35,5 +35,7 @@ TODO: Add long description of the pod here.
   s.resource_bundles = {
     'NeosuranceSDK' => ['NeosuranceSDK/Assets/*.*']
   }
- 
+  s.dependency 'AFNetworking'
+  s.dependency 'UIColor-Utilities'
+  s.dependency 'MMMaterialDesignSpinner'
 end
