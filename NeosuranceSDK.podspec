@@ -35,6 +35,5 @@ TODO: Add long description of the pod here.
   s.resource_bundles = {
     'NeosuranceSDK' => ['NeosuranceSDK/Assets/*.*']
   }
-  
-  s.dependency 'TapFramework', :git => 'https://github.com/clickntap/TapFramework'
+ 
 end
