@@ -2,7 +2,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import "NSRUser.h"
-#import "TapWeb.h"
+#import "TapWebView.h"
 #import <MapKit/MapKit.h>
 #import <CoreMotion/CoreMotion.h>
 #import <UserNotifications/UserNotifications.h>
