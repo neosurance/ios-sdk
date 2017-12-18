@@ -9,33 +9,23 @@
 Pod::Spec.new do |s|
   s.name             = 'NeosuranceSDK'
   s.version          = '0.1.0'
-  s.summary          = 'A short description of NeosuranceSDK.'
-
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
+  s.summary          = 'Collects info from device sensors and from the hosting app'
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+Neosurance SDK - Collects info from device sensors and from the hosting app - Exchanges info with the AI engines - Sends the push notification - Displays a landing page - Displays the list of the purchased policies
                        DESC
 
   s.homepage         = 'https://github.com/clickntap/NeosuranceSDK'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Tonino Mendicino' => 'tonino@clickntap.com' }
   s.source           = { :git => 'https://github.com/clickntap/NeosuranceSDK', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
 
   s.source_files = 'NeosuranceSDK/Classes/**/*'
 
   s.resource_bundles = {
     'NeosuranceSDK' => ['NeosuranceSDK/Assets/*.*']
   }
-  s.dependency 'AFNetworking'
-  s.dependency 'UIColor-Utilities'
-  s.dependency 'MMMaterialDesignSpinner'
+  s.dependency 'TapFramework'
 end
