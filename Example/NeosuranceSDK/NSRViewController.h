@@ -1,6 +1,6 @@
-#import <NeosuranceSDK/TapViewController.h>
+#import <TapFramework/TapController.h>
 
-@interface NSRViewController : TapViewController {
+@interface NSRViewController : TapController {
     UIButton* btn;
 }
 

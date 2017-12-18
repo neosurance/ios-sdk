@@ -1,8 +1,9 @@
 #import "NSR.h"
 #import "NSRUtils.h"
 #import "NSRRequest.h"
-#import "TapRequest.h"
+#import "TapData.h"
 #import "TapUtils.h"
+#import "TapWebView.h"
 #import "TapWebController.h"
 #import <AFNetworking/AFNetworking.h>
 
@@ -35,7 +36,7 @@
     return self;
 }
 
-- (void)onMessage:(TapWeb*)webView body:(NSDictionary*)body {
+- (void)onMessage:(TapWebView*)webView body:(NSDictionary*)body {
     if([@"close" compare:body[@"what"]] == NSOrderedSame) {
         [navigationController popViewControllerAnimated:YES];
     }
@@ -65,11 +66,11 @@
 
 
 -(void)showApp {
-    NSDictionary* settings = [[NSR sharedInstance] authSettings];
-    TapWebController* controller = [[TapWebController alloc] init];
-    controller.webDelegate = self;
-    controller.url = [NSURL URLWithString:settings[@"app_url"]];
-    [navigationController pushViewController:controller animated:YES];
+//    NSDictionary* settings = [[NSR sharedInstance] authSettings];
+//    TapWebController* controller = [[TapWebController alloc] init];
+//    controller.webDelegate = self;
+//    controller.url = [NSURL URLWithString:settings[@"app_url"]];
+//    [navigationController pushViewController:controller animated:YES];
 }
 
 -(void)showPush:(NSNotification*)notification {
@@ -96,10 +97,10 @@
 - (BOOL)forwardNotification:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler {
     NSDictionary* userInfo = response.notification.request.content.userInfo;
     if(userInfo != nil && [@"NSR" isEqualToString:userInfo[@"provider"]]) {
-        TapWebController* controller = [[TapWebController alloc] init];
-        controller.webDelegate = self;
-        controller.url = [NSURL URLWithString:userInfo[@"url"]];
-        [navigationController pushViewController:controller animated:YES];
+//        TapWebController* controller = [[TapWebController alloc] init];
+//        controller.webDelegate = self;
+//        controller.url = [NSURL URLWithString:userInfo[@"url"]];
+//        [navigationController pushViewController:controller animated:YES];
        return YES;
     }
     return NO;
@@ -250,7 +251,7 @@
            json = [json stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
              NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@authorize?payload=%@", nsr.settings[@"base_url"], json]];
             NSLog(@"%@", url);
-            [TapRequest requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+            [TapData requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
                 if (error) {
                     NSLog(@"NSR Error: %@", error);
                 } else {
@@ -284,7 +285,7 @@
     if(settings[@"base_demo_url"] != nil) {
         NSString* demoCode = [[NSUserDefaults standardUserDefaults] objectForKey:@"demo_code"];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:settings[@"base_demo_url"], demoCode]];
-        [TapRequest requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+        [TapData requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
             if (error) {
                 NSLog(@"NSR Error: %@", error);
             } else {

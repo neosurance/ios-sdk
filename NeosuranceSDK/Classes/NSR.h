@@ -2,12 +2,12 @@
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import "NSRUser.h"
-#import "TapWebView.h"
 #import <MapKit/MapKit.h>
 #import <CoreMotion/CoreMotion.h>
 #import <UserNotifications/UserNotifications.h>
+#import <TapFramework/TapWebView.h>
 
-@interface NSR : NSObject<CLLocationManagerDelegate,TapWebDelegate> {
+@interface NSR : NSObject<CLLocationManagerDelegate,TapWebViewDelegate> {
     NSDictionary* settings;
     NSDictionary* authSettings;
     NSDictionary* demoSettings;

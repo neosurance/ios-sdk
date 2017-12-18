@@ -2,7 +2,7 @@
 #import "NSR.h"
 #import "NSRUtils.h"
 #import "TapUtils.h"
-#import "TapRequest.h"
+#import "TapData.h"
 
 @implementation NSRRequest
 
@@ -21,7 +21,7 @@
                 [userPayload setObject:user.email forKey:@"email"];
                 [userPayload setObject:user.code forKey:@"code"];
                 NSMutableDictionary* devicePayLoad = [[NSMutableDictionary alloc] init];
-                [devicePayLoad setObject:[TapUtils uuid] forKey:@"uid"];
+                [devicePayLoad setObject:[TapUtils uuid:@"nsr" account:@"sdk"] forKey:@"uid"];
                 [devicePayLoad setObject:[nsr os] forKey:@"os"];
                 [devicePayLoad setObject:[TapUtils osVersion] forKey:@"version"];
                 [devicePayLoad setObject:[TapUtils deviceModel] forKey:@"model"];
@@ -34,7 +34,7 @@
                 json = [json urlencode];
                 token = [token urlencode];
                 NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@event?payload=%@&ns_token=%@&ns_lang=%@", nsr.settings[@"base_url"], json, token, nsr.settings[@"ns_lang"]]];
-                [TapRequest requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+                [TapData requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
                     if (error) {
                         NSLog(@"NSR Error: %@", error);
                     } else {
