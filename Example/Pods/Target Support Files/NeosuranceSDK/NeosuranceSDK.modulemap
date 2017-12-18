@@ -1,6 +1,0 @@
-framework module NeosuranceSDK {
-  umbrella header "NeosuranceSDK-umbrella.h"
-
-  export *
-  module * { export * }
-}
