@@ -1,5 +1,11 @@
 # NeosuranceSDK
 
+- Collects info from device sensors and from the hosting app
+- Exchanges info with the AI engines
+- Sends the push notification
+- Displays a landing page
+- Displays the list of the purchased policies
+
 [![Version](https://img.shields.io/cocoapods/v/NeosuranceSDK.svg?style=flat)](http://cocoadocs.org/docsets/NeosuranceSDK)
 [![License](https://img.shields.io/cocoapods/l/NeosuranceSDK.svg?style=flat)](http://cocoadocs.org/docsets/NeosuranceSDK)
 [![Platform](https://img.shields.io/cocoapods/p/NeosuranceSDK.svg?style=flat)](http://cocoadocs.org/docsets/NeosuranceSDK)
