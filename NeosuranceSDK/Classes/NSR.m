@@ -1,11 +1,10 @@
 #import "NSR.h"
 #import "NSRUtils.h"
 #import "NSRRequest.h"
-#import "TapData.h"
-#import "TapUtils.h"
-#import "TapWebView.h"
-#import "TapWebController.h"
 #import <AFNetworking/AFNetworking.h>
+#import <TapFramework/TapUtils.h>
+#import <TapFramework/TapData.h>
+#import <TapFramework/TapWebController.h>
 
 @implementation NSR
 
@@ -32,7 +31,8 @@
         [locationManager requestAlwaysAuthorization];
         self.motionActivityManager = [[CMMotionActivityManager alloc]init];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showPush:) name:@"NSRPush" object:nil];
-   }
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushIncoming:) name:@"NSRPushIncoming" object:nil];
+    }
     return self;
 }
 
@@ -66,11 +66,42 @@
 
 
 -(void)showApp {
-//    NSDictionary* settings = [[NSR sharedInstance] authSettings];
-//    TapWebController* controller = [[TapWebController alloc] init];
-//    controller.webDelegate = self;
-//    controller.url = [NSURL URLWithString:settings[@"app_url"]];
-//    [navigationController pushViewController:controller animated:YES];
+    NSDictionary* settings = [[NSR sharedInstance] authSettings];
+    TapWebController* controller = [[TapWebController alloc] init];
+    controller.delegate = self;
+    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    [dict setObject:[NSURL URLWithString:settings[@"app_url"]] forKey:@"url"];
+    controller.info = dict;
+    [navigationController pushViewController:controller animated:YES];
+}
+
+-(void)enablePushNotifications {
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge)
+                          completionHandler:^(BOOL granted, NSError * _Nullable error) {
+                              if(granted) {
+                                  UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+                                  center.delegate = self;
+                              }
+                          }];
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler  {
+    completionHandler(UNNotificationPresentationOptionAlert);
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler  {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"NSRPushIncoming" object:response.notification.request.content.userInfo];
+}
+
+-(void)pushIncoming:(NSNotification*)notification {
+    NSDictionary* dictionary = notification.object;
+   TapWebController* controller = [[TapWebController alloc] init];
+    controller.delegate = self;
+    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    [dict setObject:[NSURL URLWithString:dictionary[@"url"]] forKey:@"url"];
+    controller.info = dict;
+    [navigationController pushViewController:controller animated:YES];
 }
 
 -(void)showPush:(NSNotification*)notification {
@@ -97,10 +128,12 @@
 - (BOOL)forwardNotification:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler {
     NSDictionary* userInfo = response.notification.request.content.userInfo;
     if(userInfo != nil && [@"NSR" isEqualToString:userInfo[@"provider"]]) {
-//        TapWebController* controller = [[TapWebController alloc] init];
-//        controller.webDelegate = self;
-//        controller.url = [NSURL URLWithString:userInfo[@"url"]];
-//        [navigationController pushViewController:controller animated:YES];
+        TapWebController* controller = [[TapWebController alloc] init];
+        controller.delegate = self;
+        NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+        [dict setObject:[NSURL URLWithString:userInfo[@"url"]] forKey:@"url"];
+        controller.info = dict;
+        [navigationController pushViewController:controller animated:YES];
        return YES;
     }
     return NO;
