@@ -20,7 +20,7 @@ Neosurance SDK - Collects info from device sensors and from the hosting app - Ex
   s.author           = { 'Tonino Mendicino' => 'tonino@clickntap.com' }
   s.source           = { :git => 'https://github.com/clickntap/NeosuranceSDK', :tag => s.version.to_s }
 
-  s.ios.deployment_target = '9.0'
+  s.ios.deployment_target = '10.0'
 
   s.source_files = 'NeosuranceSDK/Classes/**/*'
 
