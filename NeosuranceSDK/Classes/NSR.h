@@ -42,7 +42,6 @@
 - (BOOL)forwardNotification:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler;
 - (void)showApp;
 - (void)sendEvent:(NSString*)name payload:(NSDictionary*)payload;
-
-
+- (void)enablePushNotifications;
 
 @end
