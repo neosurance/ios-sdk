@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'NeosuranceSDK'
-  s.version          = '0.1.1'
+  s.version          = '1.2'
   s.summary          = 'Collects info from device sensors and from the hosting app'
 
   s.description      = <<-DESC
