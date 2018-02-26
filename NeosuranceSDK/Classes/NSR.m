@@ -8,7 +8,7 @@
 
 @implementation NSR
 
-@synthesize settings, user, authSettings, context, player, motionActivityManager, locationManager, demoSettings;
+@synthesize settings, user, authSettings, context, player, motionActivityManager, locationManager, stillLocationManager, demoSettings,body;
 
 + (id)sharedInstance {
     static NSR *sharedInstance = nil;
@@ -29,16 +29,81 @@
         self.locationManager = [[CLLocationManager alloc] init];
         locationManager.delegate = self;
         [locationManager requestAlwaysAuthorization];
+        self.stillLocationManager = [[CLLocationManager alloc] init];
+        stillLocationManager.delegate = self;
+        [stillLocationManager requestAlwaysAuthorization];
+        stillPositionSent = NO;
         self.motionActivityManager = [[CMMotionActivityManager alloc]init];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showPush:) name:@"NSRPush" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLanding:) name:@"NSRLanding" object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushIncoming:) name:@"NSRPushIncoming" object:nil];
     }
     return self;
 }
 
-- (void)onMessage:(TapWebView*)webView body:(NSDictionary*)body {
+-(void)takePicture {
+    UIImagePickerController *controller = [[UIImagePickerController alloc] init];
+    controller.delegate = self;
+    controller.sourceType = UIImagePickerControllerSourceTypeCamera;
+    controller.allowsEditing = NO;
+    [navigationController presentViewController:controller animated:YES completion:^{
+
+    }];
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info {
+    UIImage* image = info[UIImagePickerControllerOriginalImage];
+    
+    CGSize newSize = CGSizeMake(512.0f*image.size.width/image.size.height,512.0f);
+    UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
+    [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    NSData *imageData = UIImageJPEGRepresentation(newImage, 1.0);
+    NSString *base64String = [imageData base64EncodedStringWithOptions:kNilOptions];
+    NSString *encodedString2 = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes( NULL,  (CFStringRef)base64String,    NULL,   CFSTR("!*'();:@&=+$,/?%#[]\" "),   kCFStringEncodingUTF8));
+    NSString* js = [NSString stringWithFormat:@"%@('data:image/png;base64,%@')",body[@"callBack"], encodedString2];
+    NSLog(@"%@", js);
+    [bodyWebView evaluateJavaScript:js];
+    [picker dismissViewControllerAnimated:YES completion:^{
+        
+    }];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    [picker dismissViewControllerAnimated:YES completion:^{
+        
+    }];
+}
+
+- (void)onMessage:(TapWebView*)webView body:(NSDictionary*)_body {
+    self.body = _body;
+    bodyWebView = webView;
+    NSLog(@"%@", body);
+    if(body[@"event"] != nil && body[@"payload"] != nil) {
+        [self sendEvent:body[@"event"] payload:body[@"payload"]];
+    }
     if([@"close" compare:body[@"what"]] == NSOrderedSame) {
         [navigationController popViewControllerAnimated:YES];
+    }
+    if([@"photo" compare:body[@"what"]] == NSOrderedSame) {
+        [self takePicture];
+    }
+    if([@"showapp" compare:body[@"what"]] == NSOrderedSame) {
+        [self showAppWithParams:body[@"params"]];
+    }
+    if([@"code" compare:body[@"what"]] == NSOrderedSame) {
+        NSString* js = [NSString stringWithFormat:@"%@('%@')",body[@"callBack"], demoSettings[@"code"]];
+        NSLog(@"%@", js);
+        [webView evaluateJavaScript:js];
+    }
+    if([@"refresh" isEqualToString:body[@"what"]]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"ResetAll" object:nil];
+    }
+    if([@"location" isEqualToString:body[@"what"]]) {
+        NSString* js = [NSString stringWithFormat:@"%@({latitude:%f,longitude:%f})",body[@"callBack"], currentLatitude, currentLongitude];
+        NSLog(@"%@", js);
+        [webView evaluateJavaScript:js];
     }
     if([@"init" compare:body[@"what"]] == NSOrderedSame) {
         [[NSR sharedInstance] token:^(NSString *token) {
@@ -51,7 +116,7 @@
             NSError *error;
             NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message options:0 error:&error];
             NSString* json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-            NSString* js = [NSString stringWithFormat:@"%@(%@)",body[@"callBack"], json];
+            NSString* js = [NSString stringWithFormat:@"%@(%@)",_body[@"callBack"], json];
             NSLog(@"%@", js);
             [webView evaluateJavaScript:js];
         }];
@@ -66,23 +131,41 @@
 
 
 -(void)showApp {
+    [self showAppWithParams:nil];
+}
+
+- (void)showAppWithParams:(NSDictionary*)params {
     NSDictionary* settings = [[NSR sharedInstance] authSettings];
-    TapWebController* controller = [[TapWebController alloc] init];
-    controller.delegate = self;
     NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
-    [dict setObject:[NSURL URLWithString:settings[@"app_url"]] forKey:@"url"];
-    controller.info = dict;
-    [navigationController pushViewController:controller animated:YES];
+    NSString* url = settings[@"app_url"];
+    if(params != nil) {
+        for (NSString* key in params) {
+            NSString* value = [NSString stringWithFormat:@"%@", [params objectForKey:key]];
+            value = [value stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+            if ([url containsString:@"?"]) {
+                url = [url stringByAppendingString:@"&"];
+            } else {
+                url = [url stringByAppendingString:@"?"];
+            }
+            url = [url stringByAppendingString:key];
+            url = [url stringByAppendingString:@"="];
+            url = [url stringByAppendingString:value];
+        }
+    }
+    [self showWebPage:url];
 }
 
 -(void)enablePushNotifications {
+     //[UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge)
+    center.delegate = self;
+    [center requestAuthorizationWithOptions:UNAuthorizationOptionAlert
                           completionHandler:^(BOOL granted, NSError * _Nullable error) {
                               if(granted) {
                                   UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
                                   center.delegate = self;
-                              }
+                                  //[[UIApplication sharedApplication] setApplicationIconBadgeNumber:43];
+                             }
                           }];
 }
 
@@ -96,18 +179,18 @@
 
 -(void)pushIncoming:(NSNotification*)notification {
     NSDictionary* dictionary = notification.object;
-   TapWebController* controller = [[TapWebController alloc] init];
-    controller.delegate = self;
-    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
-    [dict setObject:[NSURL URLWithString:dictionary[@"url"]] forKey:@"url"];
-    controller.info = dict;
-    [navigationController pushViewController:controller animated:YES];
+    [self showWebPage:dictionary[@"url"]];
 }
 
 -(void)showPush:(NSNotification*)notification {
     [TapUtils play:[[NSRUtils frameworkBundle] URLForResource:@"push" withExtension:@"wav"]];
     NSDictionary* push = notification.object;
     [self sendLocalNotificationWithTitle:push[@"title"] body:push[@"body"] payload:push];
+}
+
+-(void)showLanding:(NSNotification*)notification {
+    NSDictionary* push = notification.object;
+    [self showWebPage:push[@"url"]];
 }
 
 - (void)sendLocalNotificationWithTitle:(NSString*)title body:(NSString*)body payload:(NSDictionary*)payload {
@@ -128,15 +211,22 @@
 - (BOOL)forwardNotification:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler {
     NSDictionary* userInfo = response.notification.request.content.userInfo;
     if(userInfo != nil && [@"NSR" isEqualToString:userInfo[@"provider"]]) {
-        TapWebController* controller = [[TapWebController alloc] init];
-        controller.delegate = self;
-        NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
-        [dict setObject:[NSURL URLWithString:userInfo[@"url"]] forKey:@"url"];
-        controller.info = dict;
-        [navigationController pushViewController:controller animated:YES];
+        [self showWebPage:userInfo[@"url"]];
        return YES;
     }
     return NO;
+}
+
+-(void)showWebPage:(NSString*)url {
+    NSLog(@"--- %@", url);
+    TapWebController* controller = [[TapWebController alloc] init];
+    controller.delegate = self;
+    controller.isFullscreen = YES;
+    controller.bodyClassCheck = @"NSR";
+    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+    [dict setObject:[NSURL URLWithString:url] forKey:@"url"];
+    controller.info = dict;
+    [navigationController pushViewController:controller animated:YES];
 }
 
 
@@ -168,6 +258,9 @@
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
+    currentLatitude = newLocation.coordinate.latitude;
+    currentLongitude = newLocation.coordinate.longitude;
+    [locationManager startMonitoringSignificantLocationChanges];
     int enabled = 1;
     enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"position"][@"enabled"]] intValue];
     if(enabled == 1) {
@@ -177,9 +270,16 @@
         [payload setObject:[NSNumber numberWithFloat:oldLocation.coordinate.latitude] forKey:@"old-latitude"];
         [payload setObject:[NSNumber numberWithFloat:oldLocation.coordinate.longitude] forKey:@"old-longitude"];
         NSRRequest* request = [[NSRRequest alloc] init];
+         if(manager == stillLocationManager) {
+            [stillLocationManager stopUpdatingLocation];
+            stillPositionSent = YES;
+            [payload setObject:[NSNumber numberWithInt:1] forKey:@"still"];
+        } else {
+            stillPositionSent = NO;
+        }
         request.event = [NSRUtils makeEvent:@"position" payload:payload];
         [request send];
-    }
+   }
 }
 
 -(void)nsrIdle {
@@ -238,6 +338,10 @@
                     NSRRequest* request = [[NSRRequest alloc] init];
                     request.event = [NSRUtils makeEvent:@"activity" payload:payload];
                     [request send];
+                    if(!stillPositionSent && activity.stationary) {
+                        [stillLocationManager startUpdatingLocation];
+                     }
+
                 }
             }
         }];
@@ -318,9 +422,10 @@
     if(settings[@"base_demo_url"] != nil) {
         NSString* demoCode = [[NSUserDefaults standardUserDefaults] objectForKey:@"demo_code"];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:settings[@"base_demo_url"], demoCode]];
+        NSLog(@"NSR Error: %@", url);
         [TapData requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
             if (error) {
-                NSLog(@"NSR Error: %@", error);
+                NSLog(@"NSR Error: %@", responseObject);
             } else {
                 self.demoSettings = responseObject;
                 NSLog(@"NSR demoSettings: %@", demoSettings);
@@ -334,19 +439,20 @@
                 [appSettings setObject:responseObject[@"communityCode"] forKey:@"code"];
                 [appSettings setObject:responseObject[@"devMode"] forKey:@"dev_mode"];
                 [self setupWithDictionary:appSettings navigationController:navigationController];
-                NSRUser* user = [[NSRUser alloc] init];
-                user.email = responseObject[@"email"];
-                user.code = responseObject[@"code"];
-                user.firstname = responseObject[@"firstname"];
-                user.lastname = responseObject[@"lastname"];
-                [self setUser:user];
-                [self authorize:^(BOOL authorized) {
-                    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-                    [locationManager startMonitoringSignificantLocationChanges];
-                    [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
-                    [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
-                }];
             }
+        }];
+    } else {
+        NSRUser* user = [[NSRUser alloc] init];
+        user.email = demoSettings[@"email"];
+        user.code = demoSettings[@"code"];
+        user.firstname = demoSettings[@"firstname"];
+        user.lastname = demoSettings[@"lastname"];
+        [self setUser:user];
+        [self authorize:^(BOOL authorized) {
+            [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+            [locationManager startMonitoringSignificantLocationChanges];
+            [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
+            [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
         }];
     }
 }
@@ -360,6 +466,11 @@
         [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
     }];
 }
+
+- (void)forgetUser {
+  
+}
+
 //
 //- (void)setupWithURL:(NSURL*)settingsURL {
 //    NSDictionary* settings = [[NSDictionary alloc] initWithContentsOfURL:settingsURL];

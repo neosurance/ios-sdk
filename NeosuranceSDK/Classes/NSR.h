@@ -7,19 +7,26 @@
 #import <UserNotifications/UserNotifications.h>
 #import <TapFramework/TapWebView.h>
 
-@interface NSR : NSObject<CLLocationManagerDelegate,TapWebViewDelegate> {
+@interface NSR : NSObject<CLLocationManagerDelegate,TapWebViewDelegate, UNUserNotificationCenterDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
     NSDictionary* settings;
     NSDictionary* authSettings;
     NSDictionary* demoSettings;
+    NSDictionary* body;
+    TapWebView* bodyWebView;
     NSRUser* user;
     NSMutableDictionary* context;
     AVPlayer *player;
     CLLocationManager *locationManager;
+    CLLocationManager *stillLocationManager;
     CMMotionActivityManager *motionActivityManager;
     UINavigationController* navigationController;
+    BOOL stillPositionSent;
+    float currentLatitude;
+    float currentLongitude;
 }
 
 @property(nonatomic, copy) NSMutableDictionary* context;
+@property(nonatomic, copy) NSDictionary* body;
 @property(nonatomic, copy) NSDictionary* settings;
 @property(nonatomic, copy) NSDictionary* authSettings;
 @property(nonatomic, copy) NSDictionary* demoSettings;
@@ -27,6 +34,7 @@
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) CMMotionActivityManager *motionActivityManager;
 @property (nonatomic, strong) CLLocationManager *locationManager;
+@property (nonatomic, strong) CLLocationManager *stillLocationManager;
 
 + (id)sharedInstance;
 - (void)setupWithDictionary:(NSDictionary*)settings navigationController:(UINavigationController*)navigationController;
@@ -39,9 +47,12 @@
 - (void)stayInBackground;
 - (void)speak:(NSString *)message;
 - (void)registerUser:(NSRUser*) user;
+- (void)forgetUser;
 - (BOOL)forwardNotification:(UNNotificationResponse *)response withCompletionHandler:(void(^)(void))completionHandler;
 - (void)showApp;
+- (void)showAppWithParams:(NSDictionary*)params;
 - (void)sendEvent:(NSString*)name payload:(NSDictionary*)payload;
 - (void)enablePushNotifications;
+- (void)showWebPage:(NSString*)ur;
 
 @end
