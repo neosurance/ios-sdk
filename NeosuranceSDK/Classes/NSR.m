@@ -468,17 +468,13 @@
 }
 
 - (void)forgetUser {
-  
+    [self clearUser];
 }
 
-//
-//- (void)setupWithURL:(NSURL*)settingsURL {
-//    NSDictionary* settings = [[NSDictionary alloc] initWithContentsOfURL:settingsURL];
-//    [self setupWithDictionary:settings];
-//}
-
 - (void)clearUser {
-    
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"authSettings"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self setUser:nil];
 }
 
 - (NSString*)version {
