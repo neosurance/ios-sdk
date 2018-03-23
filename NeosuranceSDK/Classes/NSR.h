@@ -58,6 +58,7 @@
 - (void)showApp;
 - (void)showAppWithParams:(NSDictionary*)params;
 - (void)sendEvent:(NSString*)name payload:(NSDictionary*)payload;
+- (void)sendAction:(NSString*)name policyCode:(NSString*)code details:(NSString*)details;
 - (void)enablePushNotifications;
 - (void)showWebPage:(NSString*)ur;
 

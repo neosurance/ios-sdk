@@ -100,10 +100,12 @@
         [webView evaluateJavaScript:js];
     }
     if([@"user" compare:body[@"what"]] == NSOrderedSame) {
-        //TODO: NSUser as JSON
-//        NSString* js = [NSString stringWithFormat:@"%@('%@')",body[@"callBack"], userAsJsonString];
-//        NSLog(@"%@", js);
-//        [webView evaluateJavaScript:js];
+        NSString* js = [NSString stringWithFormat:@"%@('%@')",body[@"callBack"], [self.user json]];
+        NSLog(@"%@", js);
+        [webView evaluateJavaScript:js];
+    }
+    if([@"action" compare:body[@"what"]] == NSOrderedSame) {
+        [self sendAction:body[@"action"] policyCode:body[@"code"] details:body[@"details"]];
     }
     if([@"refresh" isEqualToString:body[@"what"]]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"ResetAll" object:nil];
@@ -137,6 +139,35 @@
     [request send];
 }
 
+- (void)sendAction:(NSString*)name policyCode:(NSString*)code details:(NSString*)details {
+    @try {
+        NSR* nsr = [NSR sharedInstance];
+        [nsr token:^(NSString* token) {
+            if(token != nil) {
+                NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+                [payload setObject:name forKey:@"action"];
+                [payload setObject:code forKey:@"code"];
+                [payload setObject:details forKey:@"details"];
+                [payload setObject:[[NSTimeZone localTimeZone] name] forKey:@"timezone"];
+                [payload setObject:[NSNumber numberWithLong:([[NSDate date] timeIntervalSince1970]*1000)] forKey:@"action_time"];
+                if(nsr.securityDelegate != nil) {
+                    NSMutableDictionary* headers = [[NSMutableDictionary alloc] init];
+                    [headers setObject:token forKey:@"ns_token"];
+                    [headers setObject:nsr.settings[@"ns_lang"] forKey:@"ns_lang"];
+                    [nsr.securityDelegate secureRequest:@"trace" payload:payload headers:headers completionHandler:^(NSDictionary *responseObject, NSError *error) {
+                        if (error) {
+                            NSLog(@"NSR Error: %@", error);
+                        } else {
+                            NSLog(@"NSR Action Response: %@", responseObject);
+                        }
+                    }];
+                }
+            }
+        }];
+    }
+    @catch (NSException * e) {
+    }
+}
 
 -(void)showApp {
     [self showAppWithParams:nil];
@@ -405,27 +436,7 @@
                          completionHandler(remainingSeconds > 0);
                      }
                      }];
-            } else {
-//                NSError *error;
-//                NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:&error];
-//                NSString* json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-//                NSLog(@"%@", json);
-//                json = [json stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-//                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@authorize?payload=%@", nsr.settings[@"base_url"], json]];
-//                NSLog(@"%@", url);
-//                [TapData requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
-//                    if (error) {
-//                        NSLog(@"NSR Error: %@", error);
-//                    } else {
-//                        NSLog(@"NSR Response: %@", responseObject);
-//                        self.authSettings = [[NSMutableDictionary alloc] initWithDictionary:responseObject];
-//                        [[NSUserDefaults standardUserDefaults] setObject:self.authSettings forKey:@"authSettings"];
-//                        [[NSUserDefaults standardUserDefaults] synchronize];
-//                        int remainingSeconds = [NSRUtils tokenRemainingSeconds:self.authSettings];
-//                        completionHandler(remainingSeconds > 0);
-//                    }
-//                }];
-           }
+            }
          } @catch (NSException *e) {
             completionHandler(NO);
         }
