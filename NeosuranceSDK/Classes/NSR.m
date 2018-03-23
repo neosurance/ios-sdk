@@ -99,6 +99,9 @@
         NSLog(@"%@", js);
         [webView evaluateJavaScript:js];
     }
+    
+    
+    
     if([@"user" compare:body[@"what"]] == NSOrderedSame) {
         NSString* js = [NSString stringWithFormat:@"%@('%@')",body[@"callBack"], [self.user json]];
         NSLog(@"%@", js);
@@ -107,6 +110,9 @@
     if([@"action" compare:body[@"what"]] == NSOrderedSame) {
         [self sendAction:body[@"action"] policyCode:body[@"code"] details:body[@"details"]];
     }
+    
+    
+    
     if([@"refresh" isEqualToString:body[@"what"]]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"ResetAll" object:nil];
     }

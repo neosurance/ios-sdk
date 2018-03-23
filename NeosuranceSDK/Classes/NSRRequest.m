@@ -15,18 +15,13 @@
             if(token != nil) {
                 NSRUser* user = [nsr user];
                 NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-                NSMutableDictionary* userPayload = [[NSMutableDictionary alloc] init];
-                [userPayload setObject:user.firstname forKey:@"firstname"];
-                [userPayload setObject:user.lastname forKey:@"lastname"];
-                [userPayload setObject:user.email forKey:@"email"];
-                [userPayload setObject:user.code forKey:@"code"];
                 NSMutableDictionary* devicePayLoad = [[NSMutableDictionary alloc] init];
                 [devicePayLoad setObject:[TapUtils uuid:@"nsr" account:@"sdk"] forKey:@"uid"];
                 [devicePayLoad setObject:[nsr os] forKey:@"os"];
                 [devicePayLoad setObject:[TapUtils osVersion] forKey:@"version"];
                 [devicePayLoad setObject:[TapUtils deviceModel] forKey:@"model"];
                 [payload setObject:event forKey:@"event"];
-                [payload setObject:userPayload forKey:@"user"];
+                [payload setObject:user.dictionary forKey:@"user"];
                 [payload setObject:devicePayLoad forKey:@"device"];
                 if(nsr.securityDelegate != nil) {
                     NSMutableDictionary* headers = [[NSMutableDictionary alloc] init];
