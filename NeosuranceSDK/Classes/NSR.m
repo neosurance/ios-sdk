@@ -1,6 +1,7 @@
 #import "NSR.h"
 #import "NSRUtils.h"
 #import "NSRRequest.h"
+#import "NSRDefaultSecurityDelegate.h"
 #import <AFNetworking/AFNetworking.h>
 #import <TapFramework/TapUtils.h>
 #import <TapFramework/TapData.h>
@@ -8,13 +9,14 @@
 
 @implementation NSR
 
-@synthesize settings, user, authSettings, context, player, motionActivityManager, locationManager, stillLocationManager, demoSettings,body;
+@synthesize settings, user, authSettings, context, player, motionActivityManager, locationManager, stillLocationManager, demoSettings, body, securityDelegate;
 
 + (id)sharedInstance {
     static NSR *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         sharedInstance = [[self alloc] init];
+         [sharedInstance setSecurityDelegate:[[NSRDefaultSecurityDelegate alloc] init]];
     });
     return sharedInstance;
 }
@@ -96,6 +98,12 @@
         NSString* js = [NSString stringWithFormat:@"%@('%@')",body[@"callBack"], demoSettings[@"code"]];
         NSLog(@"%@", js);
         [webView evaluateJavaScript:js];
+    }
+    if([@"user" compare:body[@"what"]] == NSOrderedSame) {
+        //TODO: NSUser as JSON
+//        NSString* js = [NSString stringWithFormat:@"%@('%@')",body[@"callBack"], userAsJsonString];
+//        NSLog(@"%@", js);
+//        [webView evaluateJavaScript:js];
     }
     if([@"refresh" isEqualToString:body[@"what"]]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"ResetAll" object:nil];
@@ -381,26 +389,44 @@
             [sdkPayload setObject:nsr.settings[@"dev_mode"] forKey:@"dev"];
             [sdkPayload setObject:[nsr os] forKey:@"os"];
             [payload setObject:sdkPayload forKey:@"sdk"];
-            NSError *error;
-            NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:&error];
-            NSString* json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-            NSLog(@"%@", json);
-           json = [json stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-             NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@authorize?payload=%@", nsr.settings[@"base_url"], json]];
-            NSLog(@"%@", url);
-            [TapData requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
-                if (error) {
-                    NSLog(@"NSR Error: %@", error);
-                } else {
-                    NSLog(@"NSR Response: %@", responseObject);
-                    self.authSettings = [[NSMutableDictionary alloc] initWithDictionary:responseObject];
-                    [[NSUserDefaults standardUserDefaults] setObject:self.authSettings forKey:@"authSettings"];
-                    [[NSUserDefaults standardUserDefaults] synchronize];
-                    int remainingSeconds = [NSRUtils tokenRemainingSeconds:self.authSettings];
-                    completionHandler(remainingSeconds > 0);
-                }
-            }];
-        } @catch (NSException *e) {
+            NSLog(@"%@", [[NSR sharedInstance] securityDelegate]);
+            NSLog(@"%@", self.securityDelegate);
+
+             if(self.securityDelegate != nil) {
+                 [self.securityDelegate secureRequest:@"authorize" payload:payload headers:nil completionHandler:^(NSDictionary *responseObject, NSError *error) {
+                     if (error) {
+                         NSLog(@"NSR Error: %@", error);
+                     } else {
+                         NSLog(@"NSR Response: %@", responseObject);
+                         self.authSettings = [[NSMutableDictionary alloc] initWithDictionary:responseObject];
+                         [[NSUserDefaults standardUserDefaults] setObject:self.authSettings forKey:@"authSettings"];
+                         [[NSUserDefaults standardUserDefaults] synchronize];
+                         int remainingSeconds = [NSRUtils tokenRemainingSeconds:self.authSettings];
+                         completionHandler(remainingSeconds > 0);
+                     }
+                     }];
+            } else {
+//                NSError *error;
+//                NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:&error];
+//                NSString* json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+//                NSLog(@"%@", json);
+//                json = [json stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+//                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@authorize?payload=%@", nsr.settings[@"base_url"], json]];
+//                NSLog(@"%@", url);
+//                [TapData requestWithURL:url completionHandler:^(NSURLResponse *response, id responseObject, NSError *error) {
+//                    if (error) {
+//                        NSLog(@"NSR Error: %@", error);
+//                    } else {
+//                        NSLog(@"NSR Response: %@", responseObject);
+//                        self.authSettings = [[NSMutableDictionary alloc] initWithDictionary:responseObject];
+//                        [[NSUserDefaults standardUserDefaults] setObject:self.authSettings forKey:@"authSettings"];
+//                        [[NSUserDefaults standardUserDefaults] synchronize];
+//                        int remainingSeconds = [NSRUtils tokenRemainingSeconds:self.authSettings];
+//                        completionHandler(remainingSeconds > 0);
+//                    }
+//                }];
+           }
+         } @catch (NSException *e) {
             completionHandler(NO);
         }
     }

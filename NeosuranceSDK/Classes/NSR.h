@@ -7,6 +7,10 @@
 #import <UserNotifications/UserNotifications.h>
 #import <TapFramework/TapWebView.h>
 
+@protocol NSRSecurityDelegate <NSObject>
+-(void)secureRequest:(NSString*)endpoint payload:(NSDictionary*)payload headers:(NSDictionary*)headers completionHandler:(void (^)(NSDictionary* responseObject, NSError *error))completionHandler;
+@end
+
 @interface NSR : NSObject<CLLocationManagerDelegate,TapWebViewDelegate, UNUserNotificationCenterDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
     NSDictionary* settings;
     NSDictionary* authSettings;
@@ -23,8 +27,10 @@
     BOOL stillPositionSent;
     float currentLatitude;
     float currentLongitude;
+    id <NSRSecurityDelegate> securityDelegate;
 }
 
+@property (nonatomic, strong) id <NSRSecurityDelegate> securityDelegate;
 @property(nonatomic, copy) NSMutableDictionary* context;
 @property(nonatomic, copy) NSDictionary* body;
 @property(nonatomic, copy) NSDictionary* settings;

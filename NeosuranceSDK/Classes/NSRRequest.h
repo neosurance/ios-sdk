@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <TapFramework/TapData.h>
 
 @interface NSRRequest : NSObject {
     NSDictionary* event;
@@ -9,3 +10,4 @@
 -(void)send;
 
 @end
+

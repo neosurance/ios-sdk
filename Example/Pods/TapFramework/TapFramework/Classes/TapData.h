@@ -2,6 +2,11 @@
 #import <AFNetworking/AFNetworking.h>
 #import "Tap.h"
 
+//@protocol TapDataSecurityDelegate <NSObject>
+//@optional
+//-(void)requestWithParameters:(NSDictionary*)parameters completionHandler:(void (^)(NSURLResponse *response, id responseObject, NSError *error))completionHandler;
+//@end
+
 @interface TapData : NSObject {
     NSArray* files;
     NSArray* databases;

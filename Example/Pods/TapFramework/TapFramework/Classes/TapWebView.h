@@ -14,15 +14,19 @@
     WKWebView* web;
     NSURL* url;
     NSString* title;
+    NSString* bodyClass;
     __weak id <TapWebViewDelegate> delegate;
     BOOL paddingEnabled;
+    BOOL closed;
 }
 
 @property (nonatomic, weak) id <TapWebViewDelegate> delegate;
 @property (nonatomic, copy) NSURL* url;
 @property (nonatomic, copy) NSString* title;
+@property (nonatomic, copy) NSString* bodyClass;
 @property (nonatomic, readonly) WKWebView* web;
 @property BOOL paddingEnabled;
+@property BOOL closed;
 
 -(void)loadURL:(NSURL*)url;
 -(void)evaluateJavaScript:(NSString*)javascript;

@@ -12,6 +12,7 @@
 
 #import "NeosuranceSDK.h"
 #import "NSR.h"
+#import "NSRDefaultSecurityDelegate.h"
 #import "NSRRequest.h"
 #import "NSRUser.h"
 #import "NSRUtils.h"

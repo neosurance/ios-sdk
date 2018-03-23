@@ -96,6 +96,16 @@ pod 'TapFramework', :git => 'https://github.com/clickntap/TapFramework'
     [[NeosuranceSDK sharedInstance] sendEvent:@"custom" payload:payload];
 ```
 
+5. -(void)setSecurityDelegate:(NSRSecurityDelegate*)
+
+ ```objc          
+   @protocol NSRSecurityDelegate <NSObject>
+   -(void)secureRequest:(NSString*)endpoint payload:(NSDictionary*)payload headers:(NSDictionary*)headers completionHandler:(void (^)(NSDictionary* responseObject, NSError *error))completionHandler;
+   @end
+
+   [[NeosuranceSDK sharedInstance] setSecurityDelegate:[[MySecurityDelegate alloc] init]];
+```
+
 ## Author
 
 Giovanni Tigli, giovanni.tigli@neosurance.eu
