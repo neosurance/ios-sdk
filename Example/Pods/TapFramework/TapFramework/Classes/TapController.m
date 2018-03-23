@@ -179,7 +179,7 @@
     progressView.alpha = (progressPercentage != 0 && progressPercentage != 1);
     progressView.frame = CGRectMake(0,size.height-ph-safeAreaBottom,progressPercentage*size.width,ph);
     int sh = [UIApplication sharedApplication].statusBarFrame.size.height;
-    header.frame = CGRectMake(0, 0, size.width, hh+sh+safeAreaTop);
+    header.frame = CGRectMake(0, 0, size.width, hh+sh);
     [self performSelector:@selector(didSetupUi) withObject:nil afterDelay:0];
 }
 

@@ -5,15 +5,28 @@
 
 @implementation TapWebController
 
+@synthesize delegate, isFullscreen, bodyClassCheck;
+
+- (id)init {
+    if (self = [super init]) {
+        self.isFullscreen = NO;
+    }
+    return self;
+}
+
 -(void)loadUi {
     [super loadUi];
     [self waitOn];
     self.view.backgroundColor = [UIColor blackColor];
     webView = [[TapWebView alloc] initWithDictionary:info];
     [self.view addSubview:webView];
-    webView.paddingEnabled = YES;
+    //webView.paddingEnabled = YES;
+    webView.delegate = self.delegate;
     toolbar = [[TapWebViewToolbar alloc] init];
     [self.view addSubview:toolbar];
+    if(isFullscreen) {
+        header.alpha = 0;
+    }
     toolbar.alpha = 0;
     if([TapDataPdfExtension isEqualToString:info[TapDataExtensionKey]]) {
         [self performSelector:@selector(downloadFile) withObject:nil afterDelay:0];
@@ -24,6 +37,16 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fileReady:) name:TapDataFileReady object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:webView selector:@selector(shareUrl:) name:TapShare object:toolbar];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(webViewReady) name:TapWebViewReady object:webView];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bodyCheck:) name:@"BodyCheck" object:webView];
+}
+
+-(void)bodyCheck:(NSNotification*)notification {
+    TapWebView* webView = notification.object;
+    if(self.bodyClassCheck != nil) {
+        if(![webView.bodyClass isEqualToString:self.bodyClassCheck]) {
+            [[self navigationController] popViewControllerAnimated:YES];
+        }
+     }
 }
 
 -(void)fileError:(NSNotification*)notification {
@@ -52,9 +75,19 @@
     }
 }
 
--(void)viewDidDisappear:(BOOL)animated {
-    [super viewDidDisappear:animated];
-    [webView close];
+-(void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    BOOL closed = YES;
+    for(UIViewController* controller in [self.navigationController viewControllers]) {
+        if(controller == self) {
+            closed = NO;
+        }
+    }
+    if(closed) {
+        NSLog(@"CLOSED %@", self);
+        webView.delegate = self.delegate = nil;
+        [webView close];
+    }
 }
 
 -(void)webViewReady {
@@ -63,7 +96,9 @@
     [UIView beginAnimations:nil context:nil];
     [UIView setAnimationDuration:[[[TapSettings sharedInstance] number:TapSettingAnimationDuration] floatValue]];
     if(header.alpha == 1) {
-        toolbar.alpha = 1;
+        if(![TapDataPdfExtension isEqualToString:info[TapDataExtensionKey]]) {
+            toolbar.alpha = 1;
+        }
     }
     [UIView commitAnimations];
 }
@@ -82,14 +117,25 @@
     }
     int hh = [[[TapSettings sharedInstance] number:TapSettingHeaderHeight] intValue];
     int sh = [UIApplication sharedApplication].statusBarFrame.size.height;
-    webView.frame = CGRectMake(0, 0, size.width, size.height);
-    toolbar.frame = CGRectMake(0, size.height-(hh+sh+safeAreaBottom), size.width, hh+sh+safeAreaBottom);
+    if(header.alpha == 0) {
+        hh = 0;
+        if(IS_IPHONEX) {
+            webView.layer.cornerRadius = 20;
+            webView.clipsToBounds = YES;
+        }
+    }
+    if(![TapDataPdfExtension isEqualToString:info[TapDataExtensionKey]]) {
+        webView.frame = CGRectMake(0, sh+hh, size.width, size.height-sh-hh*2-safeAreaBottom);
+        toolbar.frame = CGRectMake(0, size.height-(hh+safeAreaBottom), size.width, hh+safeAreaBottom);
+    } else {
+        webView.frame = CGRectMake(0, sh+hh, size.width, size.height-sh-hh-safeAreaBottom);
+    }
 }
 
 -(void)toggleUi {
     [super toggleUi];
-    if(webViewReady) {
-        toolbar.alpha = header.alpha;
+    if(webViewReady && !isFullscreen) {
+       toolbar.alpha = header.alpha;
     }
 }
 

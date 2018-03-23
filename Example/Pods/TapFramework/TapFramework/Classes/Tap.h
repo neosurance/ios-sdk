@@ -84,7 +84,7 @@
 
 @property (nonatomic, weak) id <TapDelegate> delegate;
 
-@property (strong, nonatomic) TapNavigationController *navigationController;
+@property (strong, nonatomic) UINavigationController *navigationController;
 @property BOOL resizeFull;
 
 + (id)sharedInstance;

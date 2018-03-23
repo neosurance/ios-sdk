@@ -11,6 +11,7 @@
 + (void)play:(NSURL*)url;
 + (NSString *)sha256:(NSString *)string;
 + (NSArray *)randomArray:(NSArray *)array numberOfItems:(int)size;
++ (NSBundle*)frameworkBundle;
 
 @end
 

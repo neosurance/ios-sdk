@@ -1,5 +1,6 @@
 #import "TapUtils.h"
 #import "TapSettings.h"
+#import "TapSounds.h"
 #import <sys/utsname.h>
 #import <CoreText/CTFontManager.h>
 #import <CommonCrypto/CommonDigest.h>
@@ -62,7 +63,7 @@
 }
 
 + (void)play:(NSURL*)url {
-    [[TapSettings sharedInstance] play:url];
+    [[TapSounds sharedInstance] play:url];
 }
 
 + (NSString *)sha256:(NSString *)string {
@@ -80,6 +81,14 @@
         return [dataAsString lowercaseString];
     } else
         return nil;
+}
+
++ (NSBundle*)frameworkBundle {
+    static NSBundle* frameworkBundle = nil;
+    NSString* mainBundlePath = [[NSBundle bundleForClass:[TapUtils class]] resourcePath];
+    NSString* frameworkBundlePath = [mainBundlePath stringByAppendingPathComponent:@"TapFramework.bundle"];
+    frameworkBundle = [NSBundle bundleWithPath:frameworkBundlePath];
+    return frameworkBundle;
 }
 
 @end

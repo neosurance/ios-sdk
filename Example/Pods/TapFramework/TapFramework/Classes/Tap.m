@@ -23,8 +23,8 @@
 
 - (id)init {
     if (self = [super init]) {
-        [TapUtils registerFont:[[NSBundle mainBundle] URLForResource:@"entypo" withExtension:@"ttf"]];
-        [TapUtils registerFont:[[NSBundle mainBundle] URLForResource:@"fontawesome" withExtension:@"ttf"]];
+        [TapUtils registerFont:[[TapUtils frameworkBundle] URLForResource:@"entypo" withExtension:@"ttf"]];
+        [TapUtils registerFont:[[TapUtils frameworkBundle] URLForResource:@"fontawesome" withExtension:@"ttf"]];
         self.resizeFull = YES;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(resizeFullOn) name:TapResizeFull object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(resizeFullOff) name:TapResizeSmall object:nil];
