@@ -96,7 +96,7 @@ pod 'TapFramework', :git => 'https://github.com/clickntap/TapFramework'
     [[NeosuranceSDK sharedInstance] sendEvent:@"custom" payload:payload];
 ```
 
-5. -(void)setSecurityDelegate:(NSRSecurityDelegate*)
+6. -(void)setSecurityDelegate:(NSRSecurityDelegate*)
 
  ```objc          
    @protocol NSRSecurityDelegate <NSObject>
