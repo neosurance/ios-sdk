@@ -32,4 +32,8 @@
 @property(nonatomic, copy) NSString* country;
 @property(nonatomic, copy) NSDictionary* extra;
 
+
+- (NSDictionary*)dictionary;
+- (NSString*)json;
+
 @end

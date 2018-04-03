@@ -8,7 +8,7 @@
 #import <TapFramework/TapWebView.h>
 
 @protocol NSRSecurityDelegate <NSObject>
--(void)secureRequest:(__nullable NSString*)endpoint payload:(__nullable NSDictionary*)payload headers:(__nullable NSDictionary*)headers completionHandler:(void (^)(NSDictionary* responseObject, NSError *error))completionHandler;
+-(void)secureRequest:(NSString* _Nullable)endpoint payload:(NSDictionary* _Nullable)payload headers:(NSDictionary* _Nullable)headers completionHandler:(void (^)(NSDictionary* responseObject, NSError *error))completionHandler;
 @end
 
 @interface NSR : NSObject<CLLocationManagerDelegate,TapWebViewDelegate, UNUserNotificationCenterDelegate,UINavigationControllerDelegate, UIImagePickerControllerDelegate> {
@@ -34,7 +34,7 @@
 @property(nonatomic, copy) NSMutableDictionary* context;
 @property(nonatomic, copy) NSDictionary* body;
 @property(nonatomic, copy) NSDictionary* settings;
-@property(nonatomic, copy) NSDictionary* authSettings;
+@property(nonatomic, copy) NSDictionary*    authSettings;
 @property(nonatomic, copy) NSDictionary* demoSettings;
 @property(nonatomic, copy) NSRUser* user;
 @property (nonatomic, strong) AVPlayer *player;
@@ -58,6 +58,7 @@
 - (void)showApp;
 - (void)showAppWithParams:(NSDictionary*)params;
 - (void)sendEvent:(NSString*)name payload:(NSDictionary*)payload;
+- (void)sendAction:(NSString*)name policyCode:(NSString*)code details:(NSString*)details;
 - (void)enablePushNotifications;
 - (void)showWebPage:(NSString*)ur;
 
