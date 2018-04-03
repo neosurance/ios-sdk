@@ -410,6 +410,7 @@
 -(void)authorize:(void (^)(BOOL authorized))completionHandler {
     NSR* nsr = self;
     self.authSettings = [[NSDictionary alloc] initWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:@"authSettings"]];
+    
     int remainingSeconds = [NSRUtils tokenRemainingSeconds:self.authSettings];
     if(remainingSeconds > 0) {
         if(completionHandler != nil) {
