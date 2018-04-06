@@ -49,13 +49,13 @@
     controller.sourceType = UIImagePickerControllerSourceTypeCamera;
     controller.allowsEditing = NO;
     [navigationController presentViewController:controller animated:YES completion:^{
-        
+
     }];
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info {
     UIImage* image = info[UIImagePickerControllerOriginalImage];
-    
+
     CGSize newSize = CGSizeMake(512.0f*image.size.width/image.size.height,512.0f);
     UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
     [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
@@ -68,13 +68,13 @@
     NSLog(@"%@", js);
     [bodyWebView evaluateJavaScript:js];
     [picker dismissViewControllerAnimated:YES completion:^{
-        
+
     }];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
     [picker dismissViewControllerAnimated:YES completion:^{
-        
+
     }];
 }
 
@@ -99,9 +99,9 @@
         NSLog(@"%@", js);
         [webView evaluateJavaScript:js];
     }
-    
-    
-    
+
+
+
     if([@"user" compare:body[@"what"]] == NSOrderedSame) {
         NSString* js = [NSString stringWithFormat:@"%@('%@')",body[@"callBack"], [self.user json]];
         NSLog(@"%@", js);
@@ -110,9 +110,9 @@
     if([@"action" compare:body[@"what"]] == NSOrderedSame) {
         [self sendAction:body[@"action"] policyCode:body[@"code"] details:body[@"details"]];
     }
-    
-    
-    
+
+
+
     if([@"refresh" isEqualToString:body[@"what"]]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"ResetAll" object:nil];
     }
@@ -249,7 +249,7 @@
     //UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:@"attachment" URL:attachmentUrl options:nil error:nil];
     //[content setAttachments:[NSArray arrayWithObjects:attachment, nil]];
     UNTimeIntervalNotificationTrigger* trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:0.1 repeats:NO];
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"%@", [NSDate date]] content:content trigger:trigger];
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[NSString stringWithFormat:@"NSR%@", [NSDate date]] content:content trigger:trigger];
     [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request withCompletionHandler:nil];
 }
 
@@ -390,7 +390,7 @@
                         if(!stillPositionSent && activity.stationary) {
                             [stillLocationManager startUpdatingLocation];
                         }
-                        
+
                     }
                 }
             }];
@@ -413,9 +413,9 @@
 -(void)authorize:(void (^)(BOOL authorized))completionHandler {
     NSR* nsr = self;
     self.authSettings = [[NSDictionary alloc] initWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:@"authSettings"]];
-    
+
     NSLog(@"%@", self.authSettings);
-    
+
     int remainingSeconds = [NSRUtils tokenRemainingSeconds:self.authSettings];
     if(remainingSeconds > 0) {
         if(completionHandler != nil) {
@@ -434,7 +434,7 @@
             [payload setObject:sdkPayload forKey:@"sdk"];
             NSLog(@"%@", [[NSR sharedInstance] securityDelegate]);
             NSLog(@"%@", self.securityDelegate);
-            
+
             if(self.securityDelegate != nil) {
                 [self.securityDelegate secureRequest:@"authorize" payload:payload headers:nil completionHandler:^(NSDictionary *responseObject, NSError *error) {
                     if (error) {
