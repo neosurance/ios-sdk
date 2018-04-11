@@ -43,22 +43,24 @@
     return self;
 }
 
--(UINavigationController*)findNavigationController {
-    UIApplication *application = [UIApplication sharedApplication];
-    for(UIWindow* window in [application windows]) {
-        if([window isKeyWindow]) {
-            if(window.rootViewController != nil) {
-                UIViewController* controller = window.rootViewController;
-                if([controller isKindOfClass:[UINavigationController class]]) {
-                    return (UINavigationController*)controller;
-                } else {
-                    return [controller navigationController];
-                }
-            }
-            break;
-        }
+
+- (UIViewController *)topViewController {
+    return [self topViewController:[UIApplication sharedApplication].keyWindow.rootViewController];
+}
+
+- (UIViewController *)topViewController:(UIViewController *)rootViewController {
+    if ([rootViewController isKindOfClass:[UINavigationController class]]) {
+        UINavigationController *navigationController = (UINavigationController *)rootViewController;
+        return [self topViewController:[navigationController.viewControllers lastObject]];
     }
-    return nil;
+    if ([rootViewController isKindOfClass:[UITabBarController class]]) {
+        UITabBarController *tabController = (UITabBarController *)rootViewController;
+        return [self topViewController:tabController.selectedViewController];
+    }
+    if (rootViewController.presentedViewController) {
+        return [self topViewController:rootViewController];
+    }
+    return rootViewController;
 }
 
 -(void)takePicture {
@@ -66,7 +68,7 @@
     controller.delegate = self;
     controller.sourceType = UIImagePickerControllerSourceTypeCamera;
     controller.allowsEditing = NO;
-    [[self findNavigationController] presentViewController:controller animated:YES completion:^{
+    [[self topViewController] presentViewController:controller animated:YES completion:^{
 
     }];
 }
@@ -104,7 +106,7 @@
         [self sendEvent:body[@"event"] payload:body[@"payload"]];
     }
     if([@"close" compare:body[@"what"]] == NSOrderedSame) {
-        [[self findNavigationController] popViewControllerAnimated:YES];
+        [[self topViewController] dismissViewControllerAnimated:YES completion:nil];
     }
     if([@"photo" compare:body[@"what"]] == NSOrderedSame) {
         [self takePicture];
@@ -147,6 +149,7 @@
             [message setObject:settings[@"base_url"] forKey:@"api"];
             [message setObject:token forKey:@"token"];
             [message setObject:@"it" forKey:@"lang"];
+            [message setObject:[TapUtils uuid:@"nsr" account:@"sdk"] forKey:@"deviceUid"];
             NSError *error;
             NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message options:0 error:&error];
             NSString* json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
@@ -288,7 +291,7 @@
     NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
     [dict setObject:[NSURL URLWithString:url] forKey:@"url"];
     controller.info = dict;
-    [[self findNavigationController] pushViewController:controller animated:YES];
+    [[self topViewController] presentViewController:controller animated:YES completion:nil];
 }
 
 
