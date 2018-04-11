@@ -59,7 +59,7 @@ pod 'TapFramework', :git => 'https://github.com/clickntap/TapFramework'
     [settings setObject:@"https://sandbox.neosurancecloud.net/sdk/api/v1.0/" forKey:@"base_url"];
     [settings setObject:@"xxxx" forKey:@"code"];
     [settings setObject:@"xxxx" forKey:@"secret_key"];
-    [[NeosuranceSDK sharedInstance] setupWithDictionary:settings navigationController:navigationController];
+    [[NeosuranceSDK sharedInstance] setupWithDictionary:settings];
     [[NeosuranceSDK sharedInstance] stayInBackground];
 ```
 2. setUser
