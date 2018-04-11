@@ -23,7 +23,6 @@
     CLLocationManager *locationManager;
     CLLocationManager *stillLocationManager;
     CMMotionActivityManager *motionActivityManager;
-    UINavigationController* navigationController;
     BOOL stillPositionSent;
     float currentLatitude;
     float currentLongitude;
@@ -43,7 +42,7 @@
 @property (nonatomic, strong) CLLocationManager *stillLocationManager;
 
 + (id)sharedInstance;
-- (void)setupWithDictionary:(NSDictionary*)settings navigationController:(UINavigationController*)navigationController;
+- (void)setupWithDictionary:(NSDictionary*)settings;
 - (void)setupWithURL:(NSURL*)settingsURL;
 - (void)clearUser;
 - (NSString*)version;
