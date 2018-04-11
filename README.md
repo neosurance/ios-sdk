@@ -99,7 +99,7 @@ pod 'NeosuranceSDK'
 
  ```objc          
    @protocol NSRSecurityDelegate <NSObject>
-   -(void)secureRequest:(NSString*)endpoint payload:(NSDictionary*)payload headers:(NSDictionary*)headers completionHandler:(void (^)(NSDictionary* responseObject, NSError *error))completionHandler;
+   -(void)secureRequest:(NSString* _Nullable)endpoint payload:(NSDictionary* _Nullable)payload headers:(NSDictionary* _Nullable)headers completionHandler:(void (^)(NSDictionary* responseObject, NSError *error))completionHandler;
    @end
 
    [[NeosuranceSDK sharedInstance] setSecurityDelegate:[[MySecurityDelegate alloc] init]];
