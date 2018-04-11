@@ -24,7 +24,7 @@
     [settings setObject:@"com01" forKey:@"code"];
     [settings setObject:@"pass" forKey:@"secret_key"];
     [settings setObject:[NSNumber numberWithBool:YES] forKey:@"dev_mode"];
-    [[NeosuranceSDK sharedInstance] setupWithDictionary:settings navigationController:navigationController];
+    [[NeosuranceSDK sharedInstance] setupWithDictionary:settings];
     [[NeosuranceSDK sharedInstance] stayInBackground];
     
     [self sampleRegisterUser];

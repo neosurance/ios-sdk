@@ -43,12 +43,30 @@
     return self;
 }
 
+-(UINavigationController*)findNavigationController {
+    UIApplication *application = [UIApplication sharedApplication];
+    for(UIWindow* window in [application windows]) {
+        if([window isKeyWindow]) {
+            if(window.rootViewController != nil) {
+                UIViewController* controller = window.rootViewController;
+                if([controller isKindOfClass:[UINavigationController class]]) {
+                    return (UINavigationController*)controller;
+                } else {
+                    return [controller navigationController];
+                }
+            }
+            break;
+        }
+    }
+    return nil;
+}
+
 -(void)takePicture {
     UIImagePickerController *controller = [[UIImagePickerController alloc] init];
     controller.delegate = self;
     controller.sourceType = UIImagePickerControllerSourceTypeCamera;
     controller.allowsEditing = NO;
-    [navigationController presentViewController:controller animated:YES completion:^{
+    [[self findNavigationController] presentViewController:controller animated:YES completion:^{
 
     }];
 }
@@ -86,7 +104,7 @@
         [self sendEvent:body[@"event"] payload:body[@"payload"]];
     }
     if([@"close" compare:body[@"what"]] == NSOrderedSame) {
-        [navigationController popViewControllerAnimated:YES];
+        [[self findNavigationController] popViewControllerAnimated:YES];
     }
     if([@"photo" compare:body[@"what"]] == NSOrderedSame) {
         [self takePicture];
@@ -181,7 +199,6 @@
 
 - (void)showAppWithParams:(NSDictionary*)params {
     NSDictionary* settings = [[NSR sharedInstance] authSettings];
-    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
     NSString* url = settings[@"app_url"];
     if(params != nil) {
         for (NSString* key in params) {
@@ -271,7 +288,7 @@
     NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
     [dict setObject:[NSURL URLWithString:url] forKey:@"url"];
     controller.info = dict;
-    [navigationController pushViewController:controller animated:YES];
+    [[self findNavigationController] pushViewController:controller animated:YES];
 }
 
 
@@ -455,8 +472,7 @@
     }
 }
 
-- (void)setupWithDictionary:(NSDictionary*)settings navigationController:(UINavigationController*)_navigationController {
-    navigationController = _navigationController;
+- (void)setupWithDictionary:(NSDictionary*)settings {
     NSMutableDictionary* mutableSettings = [[NSMutableDictionary alloc] initWithDictionary:settings];
     NSLog(@"%@", mutableSettings);
     if(mutableSettings[@"ns_lang"] == nil) {
@@ -487,7 +503,7 @@
                 [appSettings setObject:responseObject[@"secretKey"] forKey:@"secret_key"];
                 [appSettings setObject:responseObject[@"communityCode"] forKey:@"code"];
                 [appSettings setObject:responseObject[@"devMode"] forKey:@"dev_mode"];
-                [self setupWithDictionary:appSettings navigationController:navigationController];
+                [self setupWithDictionary:appSettings];
             }
         }];
     } else if(self.demoSettings != nil) {
