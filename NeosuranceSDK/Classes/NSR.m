@@ -161,6 +161,7 @@
 }
 
 -(void)sendEvent:(NSString*)name payload:(NSDictionary*)payload {
+    NSLog(@"sendEvent name:%@ payload:%@", name, payload);
     NSRRequest* request = [[NSRRequest alloc] init];
     request.event = [NSRUtils makeEvent:name payload:payload];
     [request send];
@@ -300,7 +301,8 @@
 }
 
 -(void)eventNetworkReachability:(AFNetworkReachabilityStatus) status {
-    int enabled = 1;
+    NSLog(@"eventNetworkReachability %d", status);
+   int enabled = 1;
     enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"connection"][@"enabled"]] intValue];
     if(enabled == 1) {
         NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
@@ -320,11 +322,13 @@
             [request send];
         }
     }
+    [[NSR sharedInstance] idle];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
     currentLatitude = newLocation.coordinate.latitude;
     currentLongitude = newLocation.coordinate.longitude;
+    NSLog(@"didUpdateToLocation %f,%f", currentLatitude, currentLongitude);
     [locationManager startMonitoringSignificantLocationChanges];
     int enabled = 1;
     enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"position"][@"enabled"]] intValue];
@@ -345,79 +349,86 @@
         request.event = [NSRUtils makeEvent:@"position" payload:payload];
         [request send];
     }
+    [[NSR sharedInstance] idle];
 }
 
 -(void)nsrIdle {
+    NSLog(@"nsrIdle %@", context);
     int delayInSeconds = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"time"]] intValue];
     if(delayInSeconds == 0) {
         delayInSeconds = 300;
     } else {
-        NSLog(@"%@", context);
-        int enabled = 1;
-        enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"power"][@"enabled"]] intValue];
-        if(enabled == 1)
-        {
-            UIDeviceBatteryState batteryState = [[UIDevice currentDevice] batteryState];
-            int batteryLevel = (int)([[UIDevice currentDevice] batteryLevel]*100);
-            NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-            [payload setObject:[NSString stringWithFormat:@"%d", batteryLevel] forKey:@"level"];
-            if(batteryState == UIDeviceBatteryStateUnplugged) {
-                [payload setObject:@"unplugged" forKey:@"type"];
-            } else {
-                [payload setObject:@"plugged" forKey:@"type"];
-            }
-            if([payload[@"type"] compare:context[@"battery-state"]] != NSOrderedSame) {
-                [context setObject:payload[@"type"] forKey:@"battery-state"];
-                NSRRequest* request = [[NSRRequest alloc] init];
-                request.event = [NSRUtils makeEvent:@"power" payload:payload];
-                [request send];
-            }
-        }
-        enabled = 1;
-        enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"enabled"]] intValue];
-        if(enabled == 1)
-        {
-            [self.motionActivityManager startActivityUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMotionActivity *activity) {
-                NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-                if(activity.walking)  {
-                    [payload setObject:@"walk" forKey:@"type"];
-                } else if(activity.stationary)  {
-                    [payload setObject:@"still" forKey:@"type"];
-                } else if(activity.automotive)  {
-                    [payload setObject:@"car" forKey:@"type"];
-                } else if(activity.running)  {
-                    [payload setObject:@"run" forKey:@"type"];
-                } else if(activity.cycling)  {
-                    [payload setObject:@"bicycle" forKey:@"type"];
-                } else  {
-                    [payload setObject:@"unknown" forKey:@"type"];
-                }
-                if(activity.confidence == CMMotionActivityConfidenceLow) {
-                    [payload setObject:@"25" forKey:@"confidence"];
-                } else if(activity.confidence == CMMotionActivityConfidenceMedium) {
-                    [payload setObject:@"50" forKey:@"confidence"];
-                } else if(activity.confidence == CMMotionActivityConfidenceHigh) {
-                    [payload setObject:@"100" forKey:@"confidence"];
-                }
-                int confidence = [payload[@"confidence"] intValue];
-                int minConfidence = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"confidence"]] intValue];
-                if(confidence >= minConfidence) {
-                    if([payload[@"type"] compare:context[@"activity-type"]] != NSOrderedSame && [payload[@"type"] compare:@"unknown"] != NSOrderedSame) {
-                        [context setObject:payload[@"type"] forKey:@"activity-type"];
-                        NSRRequest* request = [[NSRRequest alloc] init];
-                        request.event = [NSRUtils makeEvent:@"activity" payload:payload];
-                        [request send];
-                        if(!stillPositionSent && activity.stationary) {
-                            [stillLocationManager startUpdatingLocation];
-                        }
-
-                    }
-                }
-            }];
-        }
+        [self idle];
     }
     NSLog(@"delay in seconds: %d", delayInSeconds);
     [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:delayInSeconds];
+}
+
+-(void)idle {
+    NSLog(@"idle %@", context);
+    int enabled = 1;
+    enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"power"][@"enabled"]] intValue];
+    if(enabled == 1)
+    {
+        UIDeviceBatteryState batteryState = [[UIDevice currentDevice] batteryState];
+        int batteryLevel = (int)([[UIDevice currentDevice] batteryLevel]*100);
+        NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+        [payload setObject:[NSString stringWithFormat:@"%d", batteryLevel] forKey:@"level"];
+        if(batteryState == UIDeviceBatteryStateUnplugged) {
+            [payload setObject:@"unplugged" forKey:@"type"];
+        } else {
+            [payload setObject:@"plugged" forKey:@"type"];
+        }
+        if([payload[@"type"] compare:context[@"battery-state"]] != NSOrderedSame) {
+            [context setObject:payload[@"type"] forKey:@"battery-state"];
+            NSRRequest* request = [[NSRRequest alloc] init];
+            request.event = [NSRUtils makeEvent:@"power" payload:payload];
+            [request send];
+        }
+    }
+    enabled = 1;
+    enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"enabled"]] intValue];
+    if(enabled == 1)
+    {
+        [self.motionActivityManager startActivityUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMotionActivity *activity) {
+            NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+            if(activity.walking)  {
+                [payload setObject:@"walk" forKey:@"type"];
+            } else if(activity.stationary)  {
+                [payload setObject:@"still" forKey:@"type"];
+            } else if(activity.automotive)  {
+                [payload setObject:@"car" forKey:@"type"];
+            } else if(activity.running)  {
+                [payload setObject:@"run" forKey:@"type"];
+            } else if(activity.cycling)  {
+                [payload setObject:@"bicycle" forKey:@"type"];
+            } else  {
+                [payload setObject:@"unknown" forKey:@"type"];
+            }
+            if(activity.confidence == CMMotionActivityConfidenceLow) {
+                [payload setObject:@"25" forKey:@"confidence"];
+            } else if(activity.confidence == CMMotionActivityConfidenceMedium) {
+                [payload setObject:@"50" forKey:@"confidence"];
+            } else if(activity.confidence == CMMotionActivityConfidenceHigh) {
+                [payload setObject:@"100" forKey:@"confidence"];
+            }
+            int confidence = [payload[@"confidence"] intValue];
+            int minConfidence = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"confidence"]] intValue];
+            if(confidence >= minConfidence) {
+                if([payload[@"type"] compare:context[@"activity-type"]] != NSOrderedSame && [payload[@"type"] compare:@"unknown"] != NSOrderedSame) {
+                    [context setObject:payload[@"type"] forKey:@"activity-type"];
+                    NSRRequest* request = [[NSRRequest alloc] init];
+                    request.event = [NSRUtils makeEvent:@"activity" payload:payload];
+                    [request send];
+                    if(!stillPositionSent && activity.stationary) {
+                        [stillLocationManager startUpdatingLocation];
+                    }
+                    
+                }
+            }
+        }];
+    }
+    
 }
 
 - (void)token:(void (^)(NSString* token))completionHandler {
@@ -476,6 +487,7 @@
 }
 
 - (void)setupWithDictionary:(NSDictionary*)settings {
+    NSLog(@"setupWithDictionary");
     NSMutableDictionary* mutableSettings = [[NSMutableDictionary alloc] initWithDictionary:settings];
     NSLog(@"%@", mutableSettings);
     if(mutableSettings[@"ns_lang"] == nil) {
@@ -526,6 +538,7 @@
 }
 
 - (void)registerUser:(NSRUser*) user {
+    NSLog(@"registerUser %@", [user dictionary]);
     [self setUser:user];
     [self authorize:^(BOOL authorized) {
         [[AFNetworkReachabilityManager sharedManager] startMonitoring];

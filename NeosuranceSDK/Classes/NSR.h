@@ -60,5 +60,6 @@
 - (void)sendAction:(NSString*)name policyCode:(NSString*)code details:(NSString*)details;
 - (void)enablePushNotifications;
 - (void)showWebPage:(NSString*)ur;
+- (void)idle;
 
 @end
