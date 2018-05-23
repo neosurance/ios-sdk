@@ -8,6 +8,73 @@
     return self;
 }
 
+- (BOOL)valid {
+    return code != nil;
+}
+
+- (void)load {
+    NSDictionary* nsruser = [[NSUserDefaults standardUserDefaults] objectForKey:@"nsruser"];
+    if(nsruser != nil) {
+        [self fill:nsruser];
+    }
+}
+
+- (void)save {
+    [[NSUserDefaults standardUserDefaults] setObject:[self dictionary] forKey:@"nsruser"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
++(void)clear {
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"nsruser"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)fill:(NSDictionary*)dict {
+    if([dict objectForKey:@"code"] != nil) {
+        code = [dict objectForKey:@"code"];
+    }
+    if([dict objectForKey:@"email"] != nil) {
+        email = [dict objectForKey:@"email"];
+    }
+    if([dict objectForKey:@"firstname"] != nil) {
+        firstname = [dict objectForKey:@"firstname"];
+    }
+    if([dict objectForKey:@"lastname"] != nil) {
+        lastname = [dict objectForKey:@"lastname"];
+    }
+    if([dict objectForKey:@"mobile"] != nil) {
+        mobile = [dict objectForKey:@"mobile"];
+    }
+    if([dict objectForKey:@"fiscalCode"] != nil) {
+        fiscalCode = [dict objectForKey:@"fiscalCode"];
+    }
+    if([dict objectForKey:@"gender"] != nil) {
+        gender = [dict objectForKey:@"gender"];
+    }
+    if([dict objectForKey:@"birthday"] != nil) {
+        birthday = [dict objectForKey:@"birthday"];
+    }
+    if([dict objectForKey:@"address"] != nil) {
+        address = [dict objectForKey:@"address"];
+    }
+    if([dict objectForKey:@"zipCode"] != nil) {
+        zipCode = [dict objectForKey:@"zipCode"];
+    }
+    if([dict objectForKey:@"city"] != nil) {
+        city = [dict objectForKey:@"city"];
+    }
+    if([dict objectForKey:@"stateProvince"] != nil) {
+        stateProvince = [dict objectForKey:@"stateProvince"];
+    }
+    if([dict objectForKey:@"country"] != nil) {
+        country = [dict objectForKey:@"country"];
+    }
+    if([dict objectForKey:@"extra"] != nil) {
+        extra = [dict objectForKey:@"extra"];
+    }
+}
+
+
 - (NSDictionary*)dictionary {
     NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
     if(code != nil) {

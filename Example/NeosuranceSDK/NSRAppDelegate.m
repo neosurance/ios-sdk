@@ -25,10 +25,10 @@
     [settings setObject:@"pass" forKey:@"secret_key"];
     [settings setObject:[NSNumber numberWithBool:YES] forKey:@"dev_mode"];
     [[NeosuranceSDK sharedInstance] setupWithDictionary:settings];
-    [[NeosuranceSDK sharedInstance] stayInBackground];
+   // [[NeosuranceSDK sharedInstance] stayInBackground];
     
-    [self sampleRegisterUser];
-    [self sampleSendCustomEvent];
+    //[self sampleRegisterUser];
+    //[self sampleSendCustomEvent];
 
     return YES;
 }
@@ -53,21 +53,6 @@
         //TODO: handle your notification
     }
     completionHandler();
-}
-
--(void)sampleRegisterUser {
-    NSRUser* user = [[NSRUser alloc] init];
-    user.email = @"tonino@clickntap.com";
-    user.code = @"tonino@clickntap.com";
-    user.firstname = @"Tonino";
-    user.lastname = @"Mendicino";
-    [[NeosuranceSDK sharedInstance] registerUser:user];
-}
-
--(void)sampleSendCustomEvent {
-    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-    [payload setObject:@"custom" forKey:@"type"];
-    [[NeosuranceSDK sharedInstance] sendEvent:@"custom" payload:payload];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {

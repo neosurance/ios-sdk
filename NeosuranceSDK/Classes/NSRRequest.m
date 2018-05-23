@@ -10,13 +10,14 @@
 
 -(void)send {
     @try {
+        NSLog(@"NSRRequest send");
         NSR* nsr = [NSR sharedInstance];
         [nsr token:^(NSString* token) {
             if(token != nil) {
                 NSRUser* user = [nsr user];
                 NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
                 NSMutableDictionary* devicePayLoad = [[NSMutableDictionary alloc] init];
-                [devicePayLoad setObject:[TapUtils uuid:@"nsr" account:@"sdk"] forKey:@"uid"];
+                [devicePayLoad setObject:[NSR uuid] forKey:@"uid"];
                 [devicePayLoad setObject:[nsr os] forKey:@"os"];
                 [devicePayLoad setObject:[TapUtils osVersion] forKey:@"version"];
                 [devicePayLoad setObject:[TapUtils deviceModel] forKey:@"model"];
@@ -29,7 +30,7 @@
                     [headers setObject:nsr.settings[@"ns_lang"] forKey:@"ns_lang"];
                     [nsr.securityDelegate secureRequest:@"event" payload:payload headers:headers completionHandler:^(NSDictionary *responseObject, NSError *error) {
                         if (error) {
-                            NSLog(@"NSR Error: %@", error);
+                            NSLog(@"NSRRequest Error: %@", error);
                         } else {
                             BOOL skipPush = NO;
                             if(responseObject[@"skipPush"] != nil && [responseObject[@"skipPush"] intValue] == 1) {
@@ -38,7 +39,7 @@
                             NSArray* pushes = responseObject[@"pushes"];
                             if(!skipPush) {
                                 for(NSDictionary* push in pushes) {
-                                    NSLog(@"%@", push);
+                                    NSLog(@"NSRRequest: %@", push);
                                     [[NSNotificationCenter defaultCenter] postNotificationName:@"NSRPush" object:push userInfo:nil];
                                 }
                             } else {
