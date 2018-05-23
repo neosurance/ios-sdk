@@ -17,7 +17,7 @@
                 NSRUser* user = [nsr user];
                 NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
                 NSMutableDictionary* devicePayLoad = [[NSMutableDictionary alloc] init];
-                [devicePayLoad setObject:[TapUtils uuid:@"nsr" account:@"sdk"] forKey:@"uid"];
+                [devicePayLoad setObject:[NSR uuid] forKey:@"uid"];
                 [devicePayLoad setObject:[nsr os] forKey:@"os"];
                 [devicePayLoad setObject:[TapUtils osVersion] forKey:@"version"];
                 [devicePayLoad setObject:[TapUtils deviceModel] forKey:@"model"];

@@ -61,5 +61,6 @@
 - (void)enablePushNotifications;
 - (void)showWebPage:(NSString*)ur;
 - (void)idle;
++ (NSString*)uuid;
 
 @end

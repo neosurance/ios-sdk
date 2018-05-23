@@ -149,7 +149,7 @@
             [message setObject:settings[@"base_url"] forKey:@"api"];
             [message setObject:token forKey:@"token"];
             [message setObject:@"it" forKey:@"lang"];
-            [message setObject:[TapUtils uuid:@"nsr" account:@"sdk"] forKey:@"deviceUid"];
+            [message setObject:[NSR uuid] forKey:@"deviceUid"];
             NSError *error;
             NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message options:0 error:&error];
             NSString* json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
@@ -328,6 +328,10 @@
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
     currentLatitude = newLocation.coordinate.latitude;
     currentLongitude = newLocation.coordinate.longitude;
+   // [self speak:[NSString stringWithFormat:@"did update location"]];
+
+    //[self sendLocalNotificationWithTitle:@"Test" body:@"Did Update Location" payload:nil];
+    
     NSLog(@"didUpdateToLocation %f,%f", currentLatitude, currentLongitude);
     [locationManager startMonitoringSignificantLocationChanges];
     int enabled = 1;
@@ -499,6 +503,11 @@
         [mutableSettings setObject:[NSNumber numberWithInt:0] forKey:@"dev_mode"];
     }
     self.settings = mutableSettings;
+    NSRUser* user = [[NSRUser alloc] init];
+    [user load];
+    if([user valid]) {
+        [self registerUser:user];
+    }
     if(settings[@"base_demo_url"] != nil) {
         NSString* demoCode = [[NSUserDefaults standardUserDefaults] objectForKey:@"demo_code"];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:settings[@"base_demo_url"], demoCode]];
@@ -539,6 +548,9 @@
 
 - (void)registerUser:(NSRUser*) user {
     NSLog(@"registerUser %@", [user dictionary]);
+    //[self speak:[NSString stringWithFormat:@"register user %@", user.code]];
+    //[self sendLocalNotificationWithTitle:@"Test" body:@"Register User" payload:nil];
+    [user save];
     [self setUser:user];
     [self authorize:^(BOOL authorized) {
         [[AFNetworkReachabilityManager sharedManager] startMonitoring];
@@ -554,7 +566,8 @@
 
 - (void)clearUser {
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"authSettings"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+     [[NSUserDefaults standardUserDefaults] synchronize];
+    [NSRUser clear];
     [self setUser:nil];
 }
 
@@ -587,6 +600,12 @@
             break;
         }
     }
+}
+
++(NSString*)uuid {
+    NSString* uuid = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+    NSLog(@"uuid: %@", uuid);
+    return uuid;
 }
 
 @end

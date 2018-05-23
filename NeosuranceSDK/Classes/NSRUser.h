@@ -35,5 +35,10 @@
 
 - (NSDictionary*)dictionary;
 - (NSString*)json;
+- (void)fill:(NSDictionary*)dict;
+- (void)load;
+- (void)save;
+- (BOOL)valid;
++(void)clear;
 
 @end
