@@ -1,8 +1,8 @@
 # NeosuranceSDK
 
-[![Version](https://img.shields.io/cocoapods/v/NeosuranceSDK.svg?style=flat)](http://cocoadocs.org/docsets/NeosuranceSDK)
-[![License](https://img.shields.io/cocoapods/l/NeosuranceSDK.svg?style=flat)](http://cocoadocs.org/docsets/NeosuranceSDK)
-[![Platform](https://img.shields.io/cocoapods/p/NeosuranceSDK.svg?style=flat)](http://cocoadocs.org/docsets/NeosuranceSDK)
+[![Version]](http://cocoadocs.org/docsets/NeosuranceSDK)
+[![License]](http://cocoadocs.org/docsets/NeosuranceSDK)
+[![Platform]](http://cocoadocs.org/docsets/NeosuranceSDK)
 
 - Collects info from device sensors and from the hosting app
 - Exchanges info with the AI engines
@@ -107,8 +107,7 @@ pod 'NeosuranceSDK'
 
 ## Author
 
-Giovanni Tigli, giovanni.tigli@neosurance.eu
-Tonino Mendicino, tonino.mendicino@clickntap.com
+info@neosurance.eu
 
 ## License
 
