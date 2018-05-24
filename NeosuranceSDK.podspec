@@ -15,10 +15,10 @@ Pod::Spec.new do |s|
 Neosurance SDK - Collects info from device sensors and from the hosting app - Exchanges info with the AI engines - Sends the push notification - Displays a landing page - Displays the list of the purchased policies
                        DESC
 
-  s.homepage         = 'https://github.com/clickntap/NeosuranceSDK'
+  s.homepage         = 'https://github.com/neosurance/ios-sdk'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Tonino Mendicino' => 'tonino@clickntap.com' }
-  s.source           = { :git => 'https://github.com/clickntap/NeosuranceSDK', :tag => s.version.to_s }
+  s.author           = { 'Neosurance' => 'info@neosurance.eu' }
+  s.source           = { :git => 'https://github.com/neosurance/ios-sdk', :tag => s.version.to_s }
 
   s.ios.deployment_target = '10.0'
 
