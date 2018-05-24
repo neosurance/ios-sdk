@@ -1,9 +1,5 @@
 # NeosuranceSDK
 
-[![Version]](http://cocoadocs.org/docsets/NeosuranceSDK)
-[![License]](http://cocoadocs.org/docsets/NeosuranceSDK)
-[![Platform]](http://cocoadocs.org/docsets/NeosuranceSDK)
-
 - Collects info from device sensors and from the hosting app
 - Exchanges info with the AI engines
 - Sends the push notification
