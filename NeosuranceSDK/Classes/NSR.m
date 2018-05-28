@@ -561,7 +561,6 @@
 }
 
 - (void)reregisterUser:(NSRUser*) user {
-	//test
     NSLog(@"reregisterUser %@", [user dictionary]);
     [self setUser:user];
     [self authorize:^(BOOL authorized) {
