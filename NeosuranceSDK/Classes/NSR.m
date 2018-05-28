@@ -506,7 +506,7 @@
     NSRUser* user = [[NSRUser alloc] init];
     [user load];
     if([user valid]) {
-        [self registerUser:user];
+        [self reregisterUser:user];
     }
     if(settings[@"base_demo_url"] != nil) {
         NSString* demoCode = [[NSUserDefaults standardUserDefaults] objectForKey:@"demo_code"];
@@ -557,6 +557,13 @@
         [locationManager startMonitoringSignificantLocationChanges];
         [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
         [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
+    }];
+}
+
+- (void)reregisterUser:(NSRUser*) user {
+    NSLog(@"reregisterUser %@", [user dictionary]);
+    [self setUser:user];
+    [self authorize:^(BOOL authorized) {
     }];
 }
 
