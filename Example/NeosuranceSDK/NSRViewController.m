@@ -18,6 +18,11 @@
     [btnSendEvent addTarget:self  action:@selector(sendCustomEvent) forControlEvents:UIControlEventTouchUpInside];
     [btnSendEvent setTitle:@"Send Event" forState:UIControlStateNormal];
     [self.view addSubview:btnSendEvent];
+
+    btnSetup = [UIButton buttonWithType:UIButtonTypeCustom];
+    [btnSetup addTarget:self  action:@selector(setupNSR) forControlEvents:UIControlEventTouchUpInside];
+    [btnSetup setTitle:@"Setup" forState:UIControlStateNormal];
+    [self.view addSubview:btnSetup];
 }
 -(void)showApp {
     [[NeosuranceSDK sharedInstance] showApp];
@@ -25,10 +30,11 @@
 
 -(void)setupUi:(CGSize)size {
     [super setupUi:size];
-    btnSendEvent.frame = btnPolicies.frame = btnRegisterUser.frame = CGRectMake(0, 0, 160.0, 40.0);
+    btnSetup.frame = btnSendEvent.frame = btnPolicies.frame = btnRegisterUser.frame = CGRectMake(0, 0, 160.0, 40.0);
     btnRegisterUser.center = CGPointMake(size.width/2, size.height/2-40.0);
     btnPolicies.center = CGPointMake(size.width/2, size.height/2);
     btnSendEvent.center = CGPointMake(size.width/2, size.height/2+40.0);
+    btnSetup.center = CGPointMake(size.width/2, size.height/2+80.0);
 }
 
 
@@ -39,6 +45,15 @@
     user.firstname = @"giggio";
     user.lastname = @"giggio";
     [[NeosuranceSDK sharedInstance] registerUser:user];
+}
+
+-(void)setupNSR{
+    NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
+    [settings setObject:@"https://sandbox.neosurancecloud.net/sdk/api/v1.0/" forKey:@"base_url"];
+    [settings setObject:@"ispTest" forKey:@"code"];
+    [settings setObject:@"ozvj6iQQUVYVilVL7E" forKey:@"secret_key"];
+    [settings setObject:[NSNumber numberWithBool:YES] forKey:@"dev_mode"];
+    [[NeosuranceSDK sharedInstance] setupWithDictionary:settings];
 }
 
 -(void)sendCustomEvent {
