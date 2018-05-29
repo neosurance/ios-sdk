@@ -35,6 +35,7 @@
         stillLocationManager.delegate = self;
         [stillLocationManager requestAlwaysAuthorization];
         stillPositionSent = NO;
+        setupped = NO;
         self.motionActivityManager = [[CMMotionActivityManager alloc]init];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showPush:) name:@"NSRPush" object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLanding:) name:@"NSRLanding" object:nil];
@@ -130,8 +131,6 @@
     if([@"action" compare:body[@"what"]] == NSOrderedSame) {
         [self sendAction:body[@"action"] policyCode:body[@"code"] details:body[@"details"]];
     }
-    
-    
     
     if([@"refresh" isEqualToString:body[@"what"]]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"ResetAll" object:nil];
@@ -399,7 +398,7 @@
         NSLog(@"idle motion");
         [self.motionActivityManager startActivityUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMotionActivity *activity) {
             NSLog(@"idle motion IN");
-
+            
             NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
             if(activity.walking)  {
                 [payload setObject:@"walk" forKey:@"type"];
@@ -559,11 +558,14 @@
     [user save];
     [self setUser:user];
     [self authorize:^(BOOL authorized) {
-        NSLog(@"registerUser IN");
-        [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-        [locationManager startMonitoringSignificantLocationChanges];
-        [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
-        [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
+        if(!setupped){
+            NSLog(@"registerUser IN");
+            [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+            [locationManager startMonitoringSignificantLocationChanges];
+            [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
+            [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
+        }
+        setupped = YES;
     }];
 }
 
@@ -571,11 +573,14 @@
     NSLog(@"reregisterUser %@", [user dictionary]);
     [self setUser:user];
     [self authorize:^(BOOL authorized) {
-        NSLog(@"reregisterUser IN");
-        [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-        [locationManager startMonitoringSignificantLocationChanges];
-        [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
-        [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
+        if(!setupped){
+            NSLog(@"reregisterUser IN");
+            [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+            [locationManager startMonitoringSignificantLocationChanges];
+            [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
+            [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
+        }
+        setupped = YES;
     }];
 }
 

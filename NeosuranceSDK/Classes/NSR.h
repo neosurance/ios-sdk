@@ -24,6 +24,7 @@
     CLLocationManager *stillLocationManager;
     CMMotionActivityManager *motionActivityManager;
     BOOL stillPositionSent;
+    BOOL setupped;
     float currentLatitude;
     float currentLongitude;
     id <NSRSecurityDelegate> securityDelegate;
@@ -33,7 +34,7 @@
 @property(nonatomic, copy) NSMutableDictionary* context;
 @property(nonatomic, copy) NSDictionary* body;
 @property(nonatomic, copy) NSDictionary* settings;
-@property(nonatomic, copy) NSDictionary*    authSettings;
+@property(nonatomic, copy) NSDictionary* authSettings;
 @property(nonatomic, copy) NSDictionary* demoSettings;
 @property(nonatomic, copy) NSRUser* user;
 @property (nonatomic, strong) AVPlayer *player;
