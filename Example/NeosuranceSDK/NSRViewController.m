@@ -34,10 +34,10 @@
 
 -(void)registerUser {
     NSRUser* user = [[NSRUser alloc] init];
-    user.email = @"tonino@clickntap.com";
-    user.code = @"tonino@clickntap.com";
-    user.firstname = @"Tonino";
-    user.lastname = @"Mendicino";
+    user.email = @"gigio@c.com";
+    user.code = @"gigio@c.com";
+    user.firstname = @"giggio";
+    user.lastname = @"giggio";
     [[NeosuranceSDK sharedInstance] registerUser:user];
 }
 

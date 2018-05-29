@@ -21,8 +21,8 @@
 
     NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
     [settings setObject:@"https://sandbox.neosurancecloud.net/sdk/api/v1.0/" forKey:@"base_url"];
-    [settings setObject:@"com01" forKey:@"code"];
-    [settings setObject:@"pass" forKey:@"secret_key"];
+    [settings setObject:@"ispTest" forKey:@"code"];
+    [settings setObject:@"ozvj6iQQUVYVilVL7E" forKey:@"secret_key"];
     [settings setObject:[NSNumber numberWithBool:YES] forKey:@"dev_mode"];
     [[NeosuranceSDK sharedInstance] setupWithDictionary:settings];
    // [[NeosuranceSDK sharedInstance] stayInBackground];
