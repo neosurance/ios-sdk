@@ -69,13 +69,13 @@
     controller.sourceType = UIImagePickerControllerSourceTypeCamera;
     controller.allowsEditing = NO;
     [[self topViewController] presentViewController:controller animated:YES completion:^{
-
+        
     }];
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info {
     UIImage* image = info[UIImagePickerControllerOriginalImage];
-
+    
     CGSize newSize = CGSizeMake(512.0f*image.size.width/image.size.height,512.0f);
     UIGraphicsBeginImageContextWithOptions(newSize, NO, 0.0);
     [image drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
@@ -88,13 +88,13 @@
     NSLog(@"%@", js);
     [bodyWebView evaluateJavaScript:js];
     [picker dismissViewControllerAnimated:YES completion:^{
-
+        
     }];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
     [picker dismissViewControllerAnimated:YES completion:^{
-
+        
     }];
 }
 
@@ -119,9 +119,9 @@
         NSLog(@"%@", js);
         [webView evaluateJavaScript:js];
     }
-
-
-
+    
+    
+    
     if([@"user" compare:body[@"what"]] == NSOrderedSame) {
         NSString* js = [NSString stringWithFormat:@"%@('%@')",body[@"callBack"], [self.user json]];
         NSLog(@"%@", js);
@@ -130,9 +130,9 @@
     if([@"action" compare:body[@"what"]] == NSOrderedSame) {
         [self sendAction:body[@"action"] policyCode:body[@"code"] details:body[@"details"]];
     }
-
-
-
+    
+    
+    
     if([@"refresh" isEqualToString:body[@"what"]]) {
         [[NSNotificationCenter defaultCenter] postNotificationName:@"ResetAll" object:nil];
     }
@@ -302,7 +302,7 @@
 
 -(void)eventNetworkReachability:(AFNetworkReachabilityStatus) status {
     NSLog(@"eventNetworkReachability %d", status);
-   int enabled = 1;
+    int enabled = 1;
     enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"connection"][@"enabled"]] intValue];
     if(enabled == 1) {
         NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
@@ -322,38 +322,40 @@
             [request send];
         }
     }
-    [[NSR sharedInstance] idle];
+    //[[NSR sharedInstance] idle];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
+    NSLog(@"enter didUpdateToLocation");
     currentLatitude = newLocation.coordinate.latitude;
     currentLongitude = newLocation.coordinate.longitude;
-   // [self speak:[NSString stringWithFormat:@"did update location"]];
-
-    //[self sendLocalNotificationWithTitle:@"Test" body:@"Did Update Location" payload:nil];
-    
     NSLog(@"didUpdateToLocation %f,%f", currentLatitude, currentLongitude);
-    [locationManager startMonitoringSignificantLocationChanges];
-    int enabled = 1;
-    enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"position"][@"enabled"]] intValue];
-    if(enabled == 1) {
-        NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-        [payload setObject:[NSNumber numberWithFloat:newLocation.coordinate.latitude] forKey:@"latitude"];
-        [payload setObject:[NSNumber numberWithFloat:newLocation.coordinate.longitude] forKey:@"longitude"];
-        [payload setObject:[NSNumber numberWithFloat:oldLocation.coordinate.latitude] forKey:@"old-latitude"];
-        [payload setObject:[NSNumber numberWithFloat:oldLocation.coordinate.longitude] forKey:@"old-longitude"];
-        NSRRequest* request = [[NSRRequest alloc] init];
-        if(manager == stillLocationManager) {
-            [stillLocationManager stopUpdatingLocation];
-            stillPositionSent = YES;
-            [payload setObject:[NSNumber numberWithInt:1] forKey:@"still"];
-        } else {
-            stillPositionSent = NO;
+    @try{
+        [locationManager startMonitoringSignificantLocationChanges];
+        int enabled = 1;
+        enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"position"][@"enabled"]] intValue];
+        if(enabled == 1) {
+            NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+            [payload setObject:[NSNumber numberWithFloat:newLocation.coordinate.latitude] forKey:@"latitude"];
+            [payload setObject:[NSNumber numberWithFloat:newLocation.coordinate.longitude] forKey:@"longitude"];
+            [payload setObject:[NSNumber numberWithFloat:oldLocation.coordinate.latitude] forKey:@"old-latitude"];
+            [payload setObject:[NSNumber numberWithFloat:oldLocation.coordinate.longitude] forKey:@"old-longitude"];
+            NSRRequest* request = [[NSRRequest alloc] init];
+            if(manager == stillLocationManager) {
+                [stillLocationManager stopUpdatingLocation];
+                stillPositionSent = YES;
+                [payload setObject:[NSNumber numberWithInt:1] forKey:@"still"];
+            } else {
+                stillPositionSent = NO;
+            }
+            request.event = [NSRUtils makeEvent:@"position" payload:payload];
+            [request send];
         }
-        request.event = [NSRUtils makeEvent:@"position" payload:payload];
-        [request send];
+    } @catch (NSException *e) {
+        NSLog(@"didUpdateToLocation ERROR");
     }
-    [[NSR sharedInstance] idle];
+    //[[NSR sharedInstance] idle];
+    NSLog(@"didUpdateToLocation exit");
 }
 
 -(void)nsrIdle {
@@ -394,7 +396,10 @@
     enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"enabled"]] intValue];
     if(enabled == 1)
     {
+        NSLog(@"idle motion");
         [self.motionActivityManager startActivityUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMotionActivity *activity) {
+            NSLog(@"idle motion IN");
+
             NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
             if(activity.walking)  {
                 [payload setObject:@"walk" forKey:@"type"];
@@ -448,9 +453,9 @@
 -(void)authorize:(void (^)(BOOL authorized))completionHandler {
     NSR* nsr = self;
     self.authSettings = [[NSDictionary alloc] initWithDictionary:[[NSUserDefaults standardUserDefaults] objectForKey:@"authSettings"]];
-
+    
     NSLog(@"%@", self.authSettings);
-
+    
     int remainingSeconds = [NSRUtils tokenRemainingSeconds:self.authSettings];
     if(remainingSeconds > 0) {
         if(completionHandler != nil) {
@@ -469,7 +474,7 @@
             [payload setObject:sdkPayload forKey:@"sdk"];
             NSLog(@"%@", [[NSR sharedInstance] securityDelegate]);
             NSLog(@"%@", self.securityDelegate);
-
+            
             if(self.securityDelegate != nil) {
                 [self.securityDelegate secureRequest:@"authorize" payload:payload headers:nil completionHandler:^(NSDictionary *responseObject, NSError *error) {
                     if (error) {
@@ -564,6 +569,10 @@
     NSLog(@"reregisterUser %@", [user dictionary]);
     [self setUser:user];
     [self authorize:^(BOOL authorized) {
+        [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+        [locationManager startMonitoringSignificantLocationChanges];
+        [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
+        [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
     }];
 }
 
@@ -573,7 +582,7 @@
 
 - (void)clearUser {
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"authSettings"];
-     [[NSUserDefaults standardUserDefaults] synchronize];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     [NSRUser clear];
     [self setUser:nil];
 }
