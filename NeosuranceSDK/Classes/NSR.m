@@ -479,6 +479,7 @@
                 [self.securityDelegate secureRequest:@"authorize" payload:payload headers:nil completionHandler:^(NSDictionary *responseObject, NSError *error) {
                     if (error) {
                         NSLog(@"NSR Error: %@", error);
+                        completionHandler(NO);
                     } else {
                         NSLog(@"NSR Response: %@", responseObject);
                         self.authSettings = [[NSMutableDictionary alloc] initWithDictionary:responseObject];
@@ -490,6 +491,7 @@
                 }];
             }
         } @catch (NSException *e) {
+            NSLog(@"authorize ERROR");
             completionHandler(NO);
         }
     }
@@ -513,6 +515,7 @@
     if([user valid]) {
         [self reregisterUser:user];
     }
+    
     if(settings[@"base_demo_url"] != nil) {
         NSString* demoCode = [[NSUserDefaults standardUserDefaults] objectForKey:@"demo_code"];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:settings[@"base_demo_url"], demoCode]];
@@ -553,11 +556,10 @@
 
 - (void)registerUser:(NSRUser*) user {
     NSLog(@"registerUser %@", [user dictionary]);
-    //[self speak:[NSString stringWithFormat:@"register user %@", user.code]];
-    //[self sendLocalNotificationWithTitle:@"Test" body:@"Register User" payload:nil];
     [user save];
     [self setUser:user];
     [self authorize:^(BOOL authorized) {
+        NSLog(@"registerUser IN");
         [[AFNetworkReachabilityManager sharedManager] startMonitoring];
         [locationManager startMonitoringSignificantLocationChanges];
         [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
@@ -569,6 +571,7 @@
     NSLog(@"reregisterUser %@", [user dictionary]);
     [self setUser:user];
     [self authorize:^(BOOL authorized) {
+        NSLog(@"reregisterUser IN");
         [[AFNetworkReachabilityManager sharedManager] startMonitoring];
         [locationManager startMonitoringSignificantLocationChanges];
         [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
