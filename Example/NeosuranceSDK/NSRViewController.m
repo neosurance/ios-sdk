@@ -58,8 +58,7 @@
 
 -(void)sendCustomEvent {
     NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-    [payload setObject:@"custom" forKey:@"type"];
-    [[NeosuranceSDK sharedInstance] sendEvent:@"custom" payload:payload];
+    [[NeosuranceSDK sharedInstance] sendEvent:@"identity" payload:payload];
 }
 
 @end

@@ -471,8 +471,7 @@
             [sdkPayload setObject:nsr.settings[@"dev_mode"] forKey:@"dev"];
             [sdkPayload setObject:[nsr os] forKey:@"os"];
             [payload setObject:sdkPayload forKey:@"sdk"];
-            NSLog(@"%@", [[NSR sharedInstance] securityDelegate]);
-            NSLog(@"%@", self.securityDelegate);
+            NSLog(@"security delegate: %@", [[NSR sharedInstance] securityDelegate]);
             
             if(self.securityDelegate != nil) {
                 [self.securityDelegate secureRequest:@"authorize" payload:payload headers:nil completionHandler:^(NSDictionary *responseObject, NSError *error) {
