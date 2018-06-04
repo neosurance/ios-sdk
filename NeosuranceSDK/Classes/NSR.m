@@ -542,13 +542,7 @@
         user.code = demoSettings[@"code"];
         user.firstname = demoSettings[@"firstname"];
         user.lastname = demoSettings[@"lastname"];
-        [self setUser:user];
-        [self authorize:^(BOOL authorized) {
-            [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-            [locationManager startMonitoringSignificantLocationChanges];
-            [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
-            [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
-        }];
+        [self reregisterUser:user];
     }
 }
 
