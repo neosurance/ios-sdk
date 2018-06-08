@@ -155,7 +155,7 @@
             NSMutableDictionary* message = [[NSMutableDictionary alloc] init];
             [message setObject:settings[@"base_url"] forKey:@"api"];
             [message setObject:token forKey:@"token"];
-            [message setObject:@"it" forKey:@"lang"];
+            [message setObject:settings[@"ns_lang"] forKey:@"lang"];
             [message setObject:[NSR uuid] forKey:@"deviceUid"];
             NSError *error;
             NSData *jsonData = [NSJSONSerialization dataWithJSONObject:message options:0 error:&error];
