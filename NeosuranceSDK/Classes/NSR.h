@@ -24,6 +24,7 @@
     CLLocationManager *significantLocationManager;
     CLLocationManager *stillLocationManager;
     CMMotionActivityManager *motionActivityManager;
+    NSMutableArray* motionActivities;
     BOOL stillPositionSent;
     BOOL setupped;
     float currentLatitude;

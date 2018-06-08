@@ -47,7 +47,8 @@
         [stillLocationManager requestAlwaysAuthorization];
         stillPositionSent = NO;
         setupped = NO;
-        self.motionActivityManager = [[CMMotionActivityManager alloc]init];
+        self.motionActivityManager = [[CMMotionActivityManager alloc] init];
+        motionActivities = [[NSMutableArray alloc] init];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showPush:) name:@"NSRPush" object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showLanding:) name:@"NSRLanding" object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pushIncoming:) name:@"NSRPushIncoming" object:nil];
@@ -407,51 +408,6 @@
             [request send];
         }
     }
-    enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"enabled"]] intValue];
-    if(enabled == 1)
-    {
-        NSLog(@"idle motion");
-        [self.motionActivityManager startActivityUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMotionActivity *activity) {
-            NSLog(@"idle motion IN");
-            
-            NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-            if(activity.walking)  {
-                [payload setObject:@"walk" forKey:@"type"];
-            } else if(activity.stationary)  {
-                [payload setObject:@"still" forKey:@"type"];
-            } else if(activity.automotive)  {
-                [payload setObject:@"car" forKey:@"type"];
-            } else if(activity.running)  {
-                [payload setObject:@"run" forKey:@"type"];
-            } else if(activity.cycling)  {
-                [payload setObject:@"bicycle" forKey:@"type"];
-            } else  {
-                [payload setObject:@"unknown" forKey:@"type"];
-            }
-            if(activity.confidence == CMMotionActivityConfidenceLow) {
-                [payload setObject:@"25" forKey:@"confidence"];
-            } else if(activity.confidence == CMMotionActivityConfidenceMedium) {
-                [payload setObject:@"50" forKey:@"confidence"];
-            } else if(activity.confidence == CMMotionActivityConfidenceHigh) {
-                [payload setObject:@"100" forKey:@"confidence"];
-            }
-            int confidence = [payload[@"confidence"] intValue];
-            int minConfidence = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"confidence"]] intValue];
-            if(confidence >= minConfidence) {
-                if([payload[@"type"] compare:context[@"activity-type"]] != NSOrderedSame && [payload[@"type"] compare:@"unknown"] != NSOrderedSame) {
-                    [context setObject:payload[@"type"] forKey:@"activity-type"];
-                    NSRRequest* request = [[NSRRequest alloc] init];
-                    request.event = [NSRUtils makeEvent:@"activity" payload:payload];
-                    [request send];
-                    if(!stillPositionSent && activity.stationary) {
-                        [stillLocationManager requestLocation];
-                    }
-                    
-                }
-            }
-        }];
-    }
-    
 }
 
 - (void)token:(void (^)(NSString* token))completionHandler {
@@ -586,9 +542,121 @@
             [self.locationManager startMonitoringSignificantLocationChanges];
             [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
             [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
+            
+            int enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"enabled"]] intValue];
+            if(enabled == 1)
+            {
+                [self.motionActivityManager startActivityUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMotionActivity *activity) {
+                    NSLog(@"activityUpdatesToQueue IN");
+                    
+                    [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(sendActivity) object: nil];
+                    [self performSelector:@selector(sendActivity) withObject: nil afterDelay: 5];
+                    
+                    if([motionActivities count] == 0) {
+                        [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(recoveryActivity) object: nil];
+                        [self performSelector:@selector(recoveryActivity) withObject: nil afterDelay: 15];
+                    }
+                    [motionActivities addObject:activity];
+                }];
+            }
         }
         setupped = YES;
     }];
+}
+
+-(void) innerSendActivity {
+    NSLog(@"innerSendActivity");
+    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+   
+    int walkNumber = 0;
+    int stillNumber = 0;
+    int carNumber = 0;
+    int runNumber = 0;
+    int bicycleNumber = 0;
+    CMMotionActivity* motionToSend = nil;
+    int toSendNumber = 0;
+    
+    for (CMMotionActivity* activity in motionActivities)
+    {
+        if(activity.walking)  {
+            walkNumber++;
+            if(walkNumber > toSendNumber){
+                toSendNumber = walkNumber;
+                motionToSend = activity;
+                [payload setObject:@"walk" forKey:@"type"];
+            }
+        } else if(activity.stationary)  {
+            stillNumber++;
+            if(stillNumber > toSendNumber){
+                toSendNumber = stillNumber;
+                motionToSend = activity;
+                [payload setObject:@"still" forKey:@"type"];
+            }
+        } else if(activity.automotive)  {
+            carNumber++;
+            if(carNumber > toSendNumber){
+                toSendNumber = carNumber;
+                motionToSend = activity;
+                [payload setObject:@"car" forKey:@"type"];
+            }
+        } else if(activity.running)  {
+            runNumber++;
+            if(runNumber > toSendNumber){
+                toSendNumber = runNumber;
+                motionToSend = activity;
+                [payload setObject:@"run" forKey:@"type"];
+            }
+        } else if(activity.cycling)  {
+            bicycleNumber++;
+            if(bicycleNumber > toSendNumber){
+                toSendNumber = bicycleNumber;
+                motionToSend = activity;
+                [payload setObject:@"bicycle" forKey:@"type"];
+            }
+        }
+    }
+    [motionActivities removeAllObjects];
+    
+    if(motionToSend != nil) {
+        NSLog(@"activity.type  %@", payload[@"type"]);
+        if(motionToSend.confidence == CMMotionActivityConfidenceLow) {
+            [payload setObject:@"25" forKey:@"confidence"];
+        } else if(motionToSend.confidence == CMMotionActivityConfidenceMedium) {
+            [payload setObject:@"50" forKey:@"confidence"];
+        } else if(motionToSend.confidence == CMMotionActivityConfidenceHigh) {
+            [payload setObject:@"100" forKey:@"confidence"];
+        }
+        int confidence = [payload[@"confidence"] intValue];
+        NSLog(@"activity.confidence  %i", confidence);
+        int minConfidence = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"confidence"]] intValue];
+        
+        if(confidence >= minConfidence) {
+            if([payload[@"type"] compare:context[@"activity-type"]] != NSOrderedSame) {
+                [context setObject:payload[@"type"] forKey:@"activity-type"];
+                NSRRequest* request = [[NSRRequest alloc] init];
+                request.event = [NSRUtils makeEvent:@"activity" payload:payload];
+                [request send];
+                if(!stillPositionSent && motionToSend.stationary) {
+                    [stillLocationManager requestLocation];
+                }
+            }
+        }
+    }
+ }
+
+
+-(void)sendActivity {
+    NSLog(@"sendActivity");
+    [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(recoveryActivity) object: nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(sendActivity) object: nil];
+    [self innerSendActivity];
+}
+
+-(void)recoveryActivity {
+    NSLog(@"recoveryActivity");
+    [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(recoveryActivity) object: nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(sendActivity) object: nil];
+    [self innerSendActivity];
 }
 
 - (void)forgetUser {
