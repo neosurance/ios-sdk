@@ -26,6 +26,7 @@
             } else {
                 urlAsString = [urlAsString stringByAppendingFormat:@"?%@=%@", key, [value urlencode]];
             }
+            i++;
         }
     }
     NSLog(@"%@", urlAsString);

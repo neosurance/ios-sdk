@@ -31,6 +31,8 @@
         self.locationManager = [[CLLocationManager alloc] init];
         [self.locationManager setAllowsBackgroundLocationUpdates:YES];
         [self.locationManager setPausesLocationUpdatesAutomatically:NO];
+        [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
+        [self.locationManager setDesiredAccuracy:kCLLocationAccuracyBest];
         locationManager.delegate = self;
         [locationManager requestAlwaysAuthorization];
         
@@ -43,6 +45,8 @@
         self.stillLocationManager = [[CLLocationManager alloc] init];
         [self.stillLocationManager setAllowsBackgroundLocationUpdates:YES];
         [self.stillLocationManager setPausesLocationUpdatesAutomatically:NO];
+        [self.stillLocationManager setDistanceFilter:kCLDistanceFilterNone];
+        [self.stillLocationManager setDesiredAccuracy:kCLLocationAccuracyBest];
         stillLocationManager.delegate = self;
         [stillLocationManager requestAlwaysAuthorization];
         stillPositionSent = NO;
@@ -329,6 +333,7 @@
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
     if(manager == significantLocationManager) {
         [significantLocationManager startMonitoringSignificantLocationChanges];
+        [self.locationManager requestLocation];
         NSLog(@"enter significantLocationManager");
         return;
     }
@@ -377,10 +382,12 @@
 
 -(void)nsrIdle {
     NSLog(@"nsrIdle %@", context);
+    [self.locationManager requestLocation];
     int delayInSeconds = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"time"]] intValue];
     if(delayInSeconds == 0) {
         delayInSeconds = 300;
     } else {
+        [self initActivity];
         [self idle];
     }
     NSLog(@"delay in seconds: %d", delayInSeconds);
@@ -532,36 +539,38 @@
         if(!setupped){
             NSLog(@"reregisterUser IN");
             [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-            int distanceFilter = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"position"][@"meters"]] intValue];
-            if(distanceFilter == 0){
-                distanceFilter = 100;
-            }
-            [self.locationManager setDistanceFilter:distanceFilter];
-            [self.locationManager setDesiredAccuracy:distanceFilter/2];
-            [self.locationManager startUpdatingLocation];
+//            int distanceFilter = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"position"][@"meters"]] intValue];
+//            if(distanceFilter == 0){
+//                distanceFilter = 100;
+//            }
+//            [self.locationManager setDistanceFilter:distanceFilter];
+//            [self.locationManager setDesiredAccuracy:distanceFilter/2];
             [self.locationManager startMonitoringSignificantLocationChanges];
             [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
             [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
-            
-            int enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"enabled"]] intValue];
-            if(enabled == 1)
-            {
-                [self.motionActivityManager startActivityUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMotionActivity *activity) {
-                    NSLog(@"activityUpdatesToQueue IN");
-                    
-                    [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(sendActivity) object: nil];
-                    [self performSelector:@selector(sendActivity) withObject: nil afterDelay: 5];
-                    
-                    if([motionActivities count] == 0) {
-                        [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(recoveryActivity) object: nil];
-                        [self performSelector:@selector(recoveryActivity) withObject: nil afterDelay: 15];
-                    }
-                    [motionActivities addObject:activity];
-                }];
-            }
+            [self initActivity];
         }
         setupped = YES;
     }];
+}
+
+-(void) initActivity {
+    int enabled = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"activity"][@"enabled"]] intValue];
+    if(enabled == 1)
+    {
+        [self.motionActivityManager startActivityUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMMotionActivity *activity) {
+            NSLog(@"activityUpdatesToQueue IN");
+            
+            [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(sendActivity) object: nil];
+            [self performSelector:@selector(sendActivity) withObject: nil afterDelay: 5];
+            
+            if([motionActivities count] == 0) {
+                [NSObject cancelPreviousPerformRequestsWithTarget: self selector:@selector(recoveryActivity) object: nil];
+                [self performSelector:@selector(recoveryActivity) withObject: nil afterDelay: 15];
+            }
+            [motionActivities addObject:activity];
+        }];
+    }
 }
 
 -(void) innerSendActivity {
