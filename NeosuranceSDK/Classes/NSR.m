@@ -9,7 +9,7 @@
 
 @implementation NSR
 
-@synthesize settings, user, authSettings, context, player, motionActivityManager, locationManager, stillLocationManager, demoSettings, body, securityDelegate;
+@synthesize settings, user, authSettings, context, player, motionActivityManager,significantLocationManager, stillLocationManager, demoSettings, body, securityDelegate;
 
 + (id)sharedInstance {
     static NSR *sharedInstance = nil;
@@ -28,15 +28,8 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:@"NSREventNetworkReachability" object:[NSNumber numberWithInt:status]];
         }];
         context = [[NSMutableDictionary alloc] init];
-        self.locationManager = [[CLLocationManager alloc] init];
-        [self.locationManager setAllowsBackgroundLocationUpdates:YES];
-        [self.locationManager setPausesLocationUpdatesAutomatically:NO];
-        [self.locationManager setDistanceFilter:kCLDistanceFilterNone];
-        [self.locationManager setDesiredAccuracy:kCLLocationAccuracyBest];
-        locationManager.delegate = self;
-        [locationManager requestAlwaysAuthorization];
-        
-        self.significantLocationManager = [[CLLocationManager alloc] init];
+    	
+    	self.significantLocationManager = [[CLLocationManager alloc] init];
         [self.significantLocationManager setAllowsBackgroundLocationUpdates:YES];
         [self.significantLocationManager setPausesLocationUpdatesAutomatically:NO];
         significantLocationManager.delegate = self;
@@ -332,10 +325,8 @@
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
     if(manager == significantLocationManager) {
-        [significantLocationManager startMonitoringSignificantLocationChanges];
-        [self.locationManager requestLocation];
+        [self.significantLocationManager startMonitoringSignificantLocationChanges];
         NSLog(@"enter significantLocationManager");
-        return;
     }
     CLLocation *newLocation = [locations lastObject];
     NSLog(@"enter didUpdateToLocation");
@@ -348,13 +339,13 @@
             NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
             [payload setObject:[NSNumber numberWithFloat:newLocation.coordinate.latitude] forKey:@"latitude"];
             [payload setObject:[NSNumber numberWithFloat:newLocation.coordinate.longitude] forKey:@"longitude"];
-            NSRRequest* request = [[NSRRequest alloc] init];
             if(manager == stillLocationManager) {
                 stillPositionSent = YES;
                 [payload setObject:[NSNumber numberWithInt:1] forKey:@"still"];
             } else {
                 stillPositionSent = NO;
             }
+            NSRRequest* request = [[NSRRequest alloc] init];
             request.event = [NSRUtils makeEvent:@"position" payload:payload];
             [request send];
          }
@@ -382,7 +373,6 @@
 
 -(void)nsrIdle {
     NSLog(@"nsrIdle %@", context);
-    [self.locationManager requestLocation];
     int delayInSeconds = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"time"]] intValue];
     if(delayInSeconds == 0) {
         delayInSeconds = 300;
@@ -537,15 +527,9 @@
         [user save];
     [self strongAuthorize:^(BOOL authorized) {
         if(!setupped){
-            NSLog(@"reregisterUser IN");
+            NSLog(@"registerUser IN");
             [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-//            int distanceFilter = [[NSString stringWithFormat:@"%@", self.authSettings[@"conf"][@"position"][@"meters"]] intValue];
-//            if(distanceFilter == 0){
-//                distanceFilter = 100;
-//            }
-//            [self.locationManager setDistanceFilter:distanceFilter];
-//            [self.locationManager setDesiredAccuracy:distanceFilter/2];
-            [self.locationManager startMonitoringSignificantLocationChanges];
+            [self.significantLocationManager startMonitoringSignificantLocationChanges];
             [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
             [self performSelector:@selector(nsrIdle) withObject:nil afterDelay:0];
             [self initActivity];

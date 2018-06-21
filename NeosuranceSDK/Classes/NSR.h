@@ -20,7 +20,6 @@
     NSRUser* user;
     NSMutableDictionary* context;
     AVPlayer *player;
-    CLLocationManager *locationManager;
     CLLocationManager *significantLocationManager;
     CLLocationManager *stillLocationManager;
     CMMotionActivityManager *motionActivityManager;
@@ -41,7 +40,6 @@
 @property(nonatomic, copy) NSRUser* user;
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) CMMotionActivityManager *motionActivityManager;
-@property (nonatomic, strong) CLLocationManager *locationManager;
 @property (nonatomic, strong) CLLocationManager *significantLocationManager;
 @property (nonatomic, strong) CLLocationManager *stillLocationManager;
 
